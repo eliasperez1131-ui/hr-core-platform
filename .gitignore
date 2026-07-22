@@ -1,0 +1,42 @@
+# ============================================================
+#  HR CORE — .gitignore
+# ============================================================
+
+# Dependencias
+node_modules/
+.pnp
+.pnp.js
+
+# Next.js
+.next/
+out/
+build/
+dist/
+
+# Variables de entorno (NUNCA commitear secretos)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+# Supabase local
+supabase/.branches
+supabase/.temp
+
+# Misc
+*.tsbuildinfo
+next-env.d.ts

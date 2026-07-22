@@ -1,0 +1,47 @@
+{
+  "name": "hr-core-platform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "HR CORE — Plataforma SaaS B2B de evaluaciones psicométricas y ATS con Supabase",
+  "scripts": {
+    "predev": "node scripts/free-port.js 3000",
+    "dev": "next dev -p 3000",
+    "prestart": "node scripts/free-port.js 3000",
+    "start": "next start -p 3000",
+    "build": "next build",
+    "lint": "next lint",
+    "kill:3000": "node scripts/free-port.js 3000",
+    "db:push": "echo 'Copia el contenido de sql/00_run_all.sql en el SQL Editor de Supabase'",
+    "seed": "node scripts/seed-admin.js",
+    "setup": "npm install && npm run seed",
+    "daemon": "node scripts/pm2-start.js",
+    "daemon:stop": "node scripts/pm2-stop.js",
+    "daemon:status": "node scripts/pm2-status.js",
+    "daemon:logs": "pm2 logs --raw HR CORE",
+    "daemon:install": "node scripts/pm2-install.js"
+  },
+  "dependencies": {
+    "@stripe/stripe-js": "^9.12.0",
+    "@supabase/ssr": "^0.5.0",
+    "@supabase/supabase-js": "^2.45.4",
+    "dotenv": "^16.4.5",
+    "kill-port": "^2.0.1",
+    "next": "14.2.13",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-to-print": "^3.3.0",
+    "recharts": "^2.12.7",
+    "stripe": "^22.3.2"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.20",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "14.2.13",
+    "pm2": "^5.4.2",
+    "postcss": "^8.4.45",
+    "tailwindcss": "^3.4.10"
+  },
+  "engines": {
+    "node": ">=18.17.0"
+  }
+}

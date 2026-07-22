@@ -1,0 +1,292 @@
+{
+  "version": "1.1.0",
+  "updated_at": "2026-07-19",
+  "metadata": {
+    "total_reactivos": 192,
+    "bloques": {
+      "integridad":   { "total": 90, "tipo": "likert_ponderado",    "duracion_min": 45 },
+      "cognitivo":    { "total": 30, "tipo": "opcion_multiple",      "duracion_min": 25, "subbloques": ["A: Razonamiento NumÃ©rico", "B: LÃ³gica Abstracta", "C: AtenciÃ³n"] },
+      "disc":         { "total": 24, "tipo": "dicotomica_mas_menos", "duracion_min": 15, "ejes": ["D", "I", "S", "C"] },
+      "motivadores":  { "total": 12, "tipo": "likert_ponderado",    "duracion_min": 8,  "dimensiones": ["Reconocimiento y Estatus", "Impulso EconÃ³mico y Seguridad", "Crecimiento y Retos", "AutonomÃ­a vs. Dependencia"] },
+      "liderazgo":    { "total": 12, "tipo": "likert_ponderado",    "duracion_min": 8,  "dimensiones": ["AsunciÃ³n de Responsabilidades", "DelegaciÃ³n y Desarrollo de Otros", "Pensamiento EstratÃ©gico", "Manejo de Crisis"] },
+      "ventas":       { "total": 12, "tipo": "likert_ponderado",    "duracion_min": 8,  "dimensiones": ["Empuje y ProspecciÃ³n", "Resiliencia al Rechazo", "Manejo de Objeciones", "Cierre y OrientaciÃ³n a Metas"] },
+      "trato_cliente":{ "total": 12, "tipo": "likert_ponderado",    "duracion_min": 8,  "dimensiones": ["EmpatÃ­a y ConexiÃ³n", "Paciencia y Tolerancia", "OrientaciÃ³n a Soluciones", "Actitud de Servicio"] }
+    }
+  },
+
+  "integridad": {
+    "codigo": "INT-01",
+    "nombre": "Test de Integridad Organizacional",
+    "escala": { "min": 1, "max": 5, "labels": ["Totalmente en desacuerdo", "En desacuerdo", "Neutral", "De acuerdo", "Totalmente de acuerdo"] },
+    "reactivos": [
+      { "id": 1,  "dimension": "1. Cumplimiento de Normas",                  "reactivo": "Siempre sigo las polÃ­ticas de la empresa aunque nadie me estÃ© vigilando.",                                                                                                "isInverted": false, "weight": 1 },
+      { "id": 2,  "dimension": "1. Cumplimiento de Normas",                  "reactivo": "A veces es necesario saltarse las reglas para terminar el trabajo a tiempo.",                                                                                            "isInverted": true,  "weight": 1 },
+      { "id": 3,  "dimension": "1. Cumplimiento de Normas",                  "reactivo": "Cumplo los procedimientos establecidos aunque me parezcan innecesarios.",                                                                                                  "isInverted": false, "weight": 1 },
+      { "id": 4,  "dimension": "1. Cumplimiento de Normas",                  "reactivo": "Cuando una regla no tiene sentido, la ignoro sin avisar a nadie.",                                                                                                          "isInverted": true,  "weight": 1 },
+      { "id": 5,  "dimension": "1. Cumplimiento de Normas",                  "reactivo": "Respeto los horarios de entrada y salida pactados con mi empleador.",                                                                                                        "isInverted": false, "weight": 1 },
+      { "id": 6,  "dimension": "2. Responsabilidad",                         "reactivo": "Asumo la responsabilidad de mis errores sin buscar culpables.",                                                                                                               "isInverted": false, "weight": 1 },
+      { "id": 7,  "dimension": "2. Responsabilidad",                         "reactivo": "Cuando algo sale mal, prefiero que otro se haga cargo.",                                                                                                                      "isInverted": true,  "weight": 1 },
+      { "id": 8,  "dimension": "2. Responsabilidad",                         "reactivo": "Cumplir con mis obligaciones es una prioridad, incluso bajo presiÃ³n.",                                                                                                        "isInverted": false, "weight": 1 },
+      { "id": 9,  "dimension": "2. Responsabilidad",                         "reactivo": "Entrego mis tareas en el tiempo acordado sin necesidad de que me lo recuerden.",                                                                                              "isInverted": false, "weight": 1 },
+      { "id": 10, "dimension": "2. Responsabilidad",                         "reactivo": "Me cuesta admitir cuando me equivoco en algo.",                                                                                                                                "isInverted": true,  "weight": 1 },
+      { "id": 11, "dimension": "3. Honestidad",                              "reactivo": "Digo la verdad aunque me perjudique personalmente.",                                                                                                                             "isInverted": false, "weight": 1 },
+      { "id": 12, "dimension": "3. Honestidad",                              "reactivo": "A veces, pequeÃ±as mentiras son inofensivas y hasta necesarias.",                                                                                                                "isInverted": true,  "weight": 1 },
+      { "id": 13, "dimension": "3. Honestidad",                              "reactivo": "Soy transparente con mis compaÃ±eros sobre informaciÃ³n que afecta al equipo.",                                                                                                   "isInverted": false, "weight": 1 },
+      { "id": 14, "dimension": "3. Honestidad",                              "reactivo": "Reconozco abiertamente cuando no sÃ© algo, en vez de inventar una respuesta.",                                                                                                   "isInverted": false, "weight": 1 },
+      { "id": 15, "dimension": "3. Honestidad",                              "reactivo": "Es aceptable exagerar los logros propios para destacar en una entrevista.",                                                                                                     "isInverted": true,  "weight": 1 },
+      { "id": 16, "dimension": "4. Confidencialidad",                        "reactivo": "Respeto la privacidad de la informaciÃ³n que manejo en mi trabajo.",                                                                                                              "isInverted": false, "weight": 1 },
+      { "id": 17, "dimension": "4. Confidencialidad",                        "reactivo": "Compartir informaciÃ³n confidencial con amigos cercanos no es algo grave.",                                                                                                      "isInverted": true,  "weight": 1 },
+      { "id": 18, "dimension": "4. Confidencialidad",                        "reactivo": "No divulgo datos de la empresa en redes sociales ni conversaciones casuales.",                                                                                                  "isInverted": false, "weight": 1 },
+      { "id": 19, "dimension": "4. Confidencialidad",                        "reactivo": "Cuido los documentos sensibles como si fueran propios.",                                                                                                                       "isInverted": false, "weight": 1 },
+      { "id": 20, "dimension": "4. Confidencialidad",                        "reactivo": "Si me ofrecen dinero a cambio de datos internos, podrÃ­a considerarlo.",                                                                                                          "isInverted": true,  "weight": 1 },
+      { "id": 21, "dimension": "5. Manejo de Recursos",                      "reactivo": "Cuido el equipo y los materiales de trabajo como si fueran mÃ­os.",                                                                                                              "isInverted": false, "weight": 1 },
+      { "id": 22, "dimension": "5. Manejo de Recursos",                      "reactivo": "Es normal llevarse a casa cosas pequeÃ±as de la oficina (bolÃ­grafos, libretas, etc.).",                                                                                          "isInverted": true,  "weight": 1 },
+      { "id": 23, "dimension": "5. Manejo de Recursos",                      "reactivo": "Reporto de inmediato cuando algo se daÃ±a o desaparece en mi Ã¡rea.",                                                                                                            "isInverted": false, "weight": 1 },
+      { "id": 24, "dimension": "5. Manejo de Recursos",                      "reactivo": "Uso los recursos de la empresa Ãºnicamente para fines laborales.",                                                                                                                "isInverted": false, "weight": 1 },
+      { "id": 25, "dimension": "5. Manejo de Recursos",                      "reactivo": "A veces uso el equipo de la empresa para asuntos personales.",                                                                                                                 "isInverted": true,  "weight": 1 },
+      { "id": 26, "dimension": "6. Tolerancia a la PresiÃ³n",                 "reactivo": "Mantengo la calma cuando me piden algo bajo presiÃ³n o en momentos crÃ­ticos.",                                                                                                    "isInverted": false, "weight": 1 },
+      { "id": 27, "dimension": "6. Tolerancia a la PresiÃ³n",                 "reactivo": "Bajo mucha presiÃ³n, puedo justificar hacer trampa si nadie se entera.",                                                                                                         "isInverted": true,  "weight": 1 },
+      { "id": 28, "dimension": "6. Tolerancia a la PresiÃ³n",                 "reactivo": "No cedo ante compaÃ±eros que me piden romper las reglas para 'salir del paso'.",                                                                                                 "isInverted": false, "weight": 1 },
+      { "id": 29, "dimension": "6. Tolerancia a la PresiÃ³n",                 "reactivo": "Afronto situaciones estresantes sin perder mi Ã©tica profesional.",                                                                                                              "isInverted": false, "weight": 1 },
+      { "id": 30, "dimension": "6. Tolerancia a la PresiÃ³n",                 "reactivo": "En momentos crÃ­ticos, las reglas se pueden flexibilizar para lograr resultados.",                                                                                                "isInverted": true,  "weight": 1 },
+      { "id": 31, "dimension": "7. Honestidad y Confiabilidad",              "reactivo": "Las personas pueden confiar plenamente en mi palabra.",                                                                                                                         "isInverted": false, "weight": 2 },
+      { "id": 32, "dimension": "7. Honestidad y Confiabilidad",              "reactivo": "A veces prometo cosas que sÃ© que no voy a cumplir.",                                                                                                                            "isInverted": true,  "weight": 2 },
+      { "id": 33, "dimension": "7. Honestidad y Confiabilidad",              "reactivo": "Si descubro un error que me beneficia a mÃ­, lo corrijo de inmediato.",                                                                                                          "isInverted": false, "weight": 2 },
+      { "id": 34, "dimension": "7. Honestidad y Confiabilidad",              "reactivo": "Soy una persona de palabra en todos los aspectos de mi vida, no solo en el trabajo.",                                                                                            "isInverted": false, "weight": 2 },
+      { "id": 35, "dimension": "7. Honestidad y Confiabilidad",              "reactivo": "He inventado excusas para no cumplir con un compromiso importante.",                                                                                                            "isInverted": true,  "weight": 2 },
+      { "id": 36, "dimension": "8. Respeto a la Autoridad",                  "reactivo": "Respeto las decisiones de mis superiores aunque no las comparta.",                                                                                                               "isInverted": false, "weight": 1 },
+      { "id": 37, "dimension": "8. Respeto a la Autoridad",                  "reactivo": "Cuestiono las Ã³rdenes de mis jefes en pÃºblico cuando no estoy de acuerdo.",                                                                                                       "isInverted": true,  "weight": 1 },
+      { "id": 38, "dimension": "8. Respeto a la Autoridad",                  "reactivo": "Sigo la cadena de mando para resolver problemas laborales.",                                                                                                                    "isInverted": false, "weight": 1 },
+      { "id": 39, "dimension": "8. Respeto a la Autoridad",                  "reactivo": "A veces ignoro instrucciones si no estoy de acuerdo con ellas.",                                                                                                                "isInverted": true,  "weight": 1 },
+      { "id": 40, "dimension": "8. Respeto a la Autoridad",                  "reactivo": "Acepto con apertura la crÃ­tica constructiva de mis superiores.",                                                                                                                "isInverted": false, "weight": 1 },
+      { "id": 41, "dimension": "9. Compromiso Ã‰tico",                        "reactivo": "Prefiero renunciar antes que participar en actos deshonestos.",                                                                                                                   "isInverted": false, "weight": 1 },
+      { "id": 42, "dimension": "9. Compromiso Ã‰tico",                        "reactivo": "Todos exageran en su currÃ­culum, no es tan grave.",                                                                                                                            "isInverted": true,  "weight": 1 },
+      { "id": 43, "dimension": "9. Compromiso Ã‰tico",                        "reactivo": "DenunciarÃ­a a un compaÃ±ero que comete una falta grave contra la empresa.",                                                                                                       "isInverted": false, "weight": 1 },
+      { "id": 44, "dimension": "9. Compromiso Ã‰tico",                        "reactivo": "Mis valores personales guÃ­an mi comportamiento laboral cotidiano.",                                                                                                            "isInverted": false, "weight": 1 },
+      { "id": 45, "dimension": "9. Compromiso Ã‰tico",                        "reactivo": "La Ã©tica depende de la situaciÃ³n y de las personas involucradas.",                                                                                                              "isInverted": true,  "weight": 1 },
+      { "id": 46, "dimension": "10. Transparencia",                          "reactivo": "Comunico con claridad lo que hago y por quÃ© lo hago.",                                                                                                                          "isInverted": false, "weight": 1 },
+      { "id": 47, "dimension": "10. Transparencia",                          "reactivo": "A veces oculto informaciÃ³n para protegerme de consecuencias.",                                                                                                                  "isInverted": true,  "weight": 1 },
+      { "id": 48, "dimension": "10. Transparencia",                          "reactivo": "Documento mis decisiones importantes para que otros las puedan entender.",                                                                                                        "isInverted": false, "weight": 1 },
+      { "id": 49, "dimension": "10. Transparencia",                          "reactivo": "Soy claro cuando no entiendo algo, en lugar de asentir por quedar bien.",                                                                                                         "isInverted": false, "weight": 1 },
+      { "id": 50, "dimension": "10. Transparencia",                          "reactivo": "La opacidad es a veces necesaria para proteger los intereses del negocio.",                                                                                                       "isInverted": true,  "weight": 1 },
+      { "id": 51, "dimension": "11. Lealtad",                                "reactivo": "Defiendo a la empresa frente a crÃ­ticas externas injustificadas.",                                                                                                                "isInverted": false, "weight": 1 },
+      { "id": 52, "dimension": "11. Lealtad",                                "reactivo": "Si me ofrecen mejor sueldo, no dudarÃ­a en irme sin previo aviso.",                                                                                                                "isInverted": true,  "weight": 1 },
+      { "id": 53, "dimension": "11. Lealtad",                                "reactivo": "No hablo mal de la empresa en redes sociales ni en reuniones sociales.",                                                                                                          "isInverted": false, "weight": 1 },
+      { "id": 54, "dimension": "11. Lealtad",                                "reactivo": "Cumplo el periodo de preaviso antes de renunciar a un puesto.",                                                                                                                  "isInverted": false, "weight": 1 },
+      { "id": 55, "dimension": "11. Lealtad",                                "reactivo": "Es normal buscar trabajo activamente mientras se estÃ¡ empleado.",                                                                                                                "isInverted": true,  "weight": 1 },
+      { "id": 56, "dimension": "12. Prudencia",                              "reactivo": "Pienso dos veces antes de actuar bajo presiÃ³n emocional.",                                                                                                                       "isInverted": false, "weight": 1 },
+      { "id": 57, "dimension": "12. Prudencia",                              "reactivo": "Las decisiones impulsivas son parte del Ã©xito en los negocios.",                                                                                                                  "isInverted": true,  "weight": 1 },
+      { "id": 58, "dimension": "12. Prudencia",                              "reactivo": "Evito tomar riesgos innecesarios en mi trabajo diario.",                                                                                                                         "isInverted": false, "weight": 1 },
+      { "id": 59, "dimension": "12. Prudencia",                              "reactivo": "Consulto con mi superior antes de tomar decisiones importantes.",                                                                                                                 "isInverted": false, "weight": 1 },
+      { "id": 60, "dimension": "12. Prudencia",                              "reactivo": "A veces hay que actuar sin pensar para destacar y avanzar.",                                                                                                                    "isInverted": true,  "weight": 1 },
+      { "id": 61, "dimension": "13. Probidad",                               "reactivo": "No acepto regalos que puedan comprometer mi objetividad profesional.",                                                                                                            "isInverted": false, "weight": 1 },
+      { "id": 62, "dimension": "13. Probidad",                               "reactivo": "Los regalos de proveedores son una prÃ¡ctica normal del mundo de los negocios.",                                                                                                  "isInverted": true,  "weight": 1 },
+      { "id": 63, "dimension": "13. Probidad",                               "reactivo": "Me alejo de situaciones que puedan parecer conflicto de interÃ©s.",                                                                                                                "isInverted": false, "weight": 1 },
+      { "id": 64, "dimension": "13. Probidad",                               "reactivo": "Rechazo favores de terceros que buscan obtener una ventaja indebida.",                                                                                                            "isInverted": false, "weight": 1 },
+      { "id": 65, "dimension": "13. Probidad",                               "reactivo": "PequeÃ±os favores a cambio de algo no son corrupciÃ³n, son cortesÃ­a.",                                                                                                              "isInverted": true,  "weight": 1 },
+      { "id": 66, "dimension": "14. Justicia",                               "reactivo": "Trato a todos mis compaÃ±eros con equidad, sin favoritismos.",                                                                                                                     "isInverted": false, "weight": 1 },
+      { "id": 67, "dimension": "14. Justicia",                               "reactivo": "En el trabajo, los favores se dan a quienes mejor nos caen.",                                                                                                                    "isInverted": true,  "weight": 1 },
+      { "id": 68, "dimension": "14. Justicia",                               "reactivo": "No discrimino a nadie por su origen, gÃ©nero, religiÃ³n o ideologÃ­a.",                                                                                                              "isInverted": false, "weight": 1 },
+      { "id": 69, "dimension": "14. Justicia",                               "reactivo": "Reconozco abiertamente el mÃ©rito de los demÃ¡s, sin atribuÃ­rmelo.",                                                                                                                 "isInverted": false, "weight": 1 },
+      { "id": 70, "dimension": "14. Justicia",                               "reactivo": "Es natural ayudar mÃ¡s a quienes me caen bien que al resto.",                                                                                                                     "isInverted": true,  "weight": 1 },
+      { "id": 71, "dimension": "15. Autenticidad",                           "reactivo": "Soy la misma persona en el trabajo que fuera de Ã©l.",                                                                                                                            "isInverted": false, "weight": 1 },
+      { "id": 72, "dimension": "15. Autenticidad",                           "reactivo": "En el trabajo hay que 'ponerse la mÃ¡scara' para sobrevivir.",                                                                                                                    "isInverted": true,  "weight": 1 },
+      { "id": 73, "dimension": "15. Autenticidad",                           "reactivo": "No finjo ser alguien que no soy para conseguir un puesto.",                                                                                                                     "isInverted": false, "weight": 1 },
+      { "id": 74, "dimension": "15. Autenticidad",                           "reactivo": "Mis colegas me describen como una persona coherente entre lo que dice y hace.",                                                                                                  "isInverted": false, "weight": 1 },
+      { "id": 75, "dimension": "15. Autenticidad",                           "reactivo": "La hipocresÃ­a es parte inevitable de la polÃ­tica de oficina.",                                                                                                                  "isInverted": true,  "weight": 1 },
+      { "id": 76, "dimension": "16. Integridad en Relaciones Laborales",    "reactivo": "Mantengo relaciones profesionales con todos mis colegas, sin favoritismos.",                                                                                                     "isInverted": false, "weight": 1 },
+      { "id": 77, "dimension": "16. Integridad en Relaciones Laborales",    "reactivo": "Las relaciones personales se pueden mezclar con el trabajo sin problema.",                                                                                                       "isInverted": true,  "weight": 1 },
+      { "id": 78, "dimension": "16. Integridad en Relaciones Laborales",    "reactivo": "No difundo rumores que puedan daÃ±ar la reputaciÃ³n de un compaÃ±ero.",                                                                                                            "isInverted": false, "weight": 1 },
+      { "id": 79, "dimension": "16. Integridad en Relaciones Laborales",    "reactivo": "Resuelvo los conflictos directamente con la persona involucrada.",                                                                                                              "isInverted": false, "weight": 1 },
+      { "id": 80, "dimension": "16. Integridad en Relaciones Laborales",    "reactivo": "El chisme es parte normal del ambiente laboral.",                                                                                                                              "isInverted": true,  "weight": 1 },
+      { "id": 81, "dimension": "17. Integridad Digital",                    "reactivo": "No comparto las contraseÃ±as de la empresa con terceros, ni siquiera compaÃ±eros.",                                                                                                "isInverted": false, "weight": 1 },
+      { "id": 82, "dimension": "17. Integridad Digital",                    "reactivo": "EstÃ¡ bien revisar redes sociales personales en horario de trabajo.",                                                                                                             "isInverted": true,  "weight": 1 },
+      { "id": 83, "dimension": "17. Integridad Digital",                    "reactivo": "Reporto de inmediato los correos de phishing o intentos de fraude.",                                                                                                            "isInverted": false, "weight": 1 },
+      { "id": 84, "dimension": "17. Integridad Digital",                    "reactivo": "Respeto la propiedad intelectual del contenido que encuentro en internet.",                                                                                                       "isInverted": false, "weight": 1 },
+      { "id": 85, "dimension": "17. Integridad Digital",                    "reactivo": "Descargar contenido pirata de forma ocasional es inofensivo.",                                                                                                                  "isInverted": true,  "weight": 1 },
+      { "id": 86, "dimension": "18. Conducta Fuera del Trabajo",            "reactivo": "Mi conducta fuera del trabajo refleja los valores de la empresa que represento.",                                                                                                "isInverted": false, "weight": 1 },
+      { "id": 87, "dimension": "18. Conducta Fuera del Trabajo",            "reactivo": "Lo que hago en mi tiempo libre no afecta en nada mi trabajo.",                                                                                                                  "isInverted": true,  "weight": 1 },
+      { "id": 88, "dimension": "18. Conducta Fuera del Trabajo",            "reactivo": "Cuido mi reputaciÃ³n online porque me representa profesionalmente.",                                                                                                            "isInverted": false, "weight": 1 },
+      { "id": 89, "dimension": "18. Conducta Fuera del Trabajo",            "reactivo": "Evito comportamientos que puedan daÃ±ar la imagen pÃºblica de la empresa.",                                                                                                       "isInverted": false, "weight": 1 },
+      { "id": 90, "dimension": "18. Conducta Fuera del Trabajo",            "reactivo": "Las redes sociales personales son completamente independientes del trabajo.",                                                                                                  "isInverted": true,  "weight": 1 }
+    ]
+  },
+
+  "cognitivo": {
+    "codigo": "COG-01",
+    "nombre": "Prueba Cognitiva (NumÃ©rico + LÃ³gica + AtenciÃ³n)",
+    "instrucciones": "Selecciona la opciÃ³n correcta. Solo una respuesta es vÃ¡lida por reactivo.",
+    "reactivos": [
+      { "id": "A1", "bloque": "A. Razonamiento NumÃ©rico", "tema": "Proporcionalidad", "reactivo": "Si 3 cajas pesan 12 kg, Â¿cuÃ¡nto pesarÃ¡n 7 cajas?",                                                            "opciones": ["24 kg", "26 kg", "28 kg", "30 kg"], "respuestaCorrecta": 2, "weight": 1 },
+      { "id": "A2", "bloque": "A. Razonamiento NumÃ©rico", "tema": "Series",            "reactivo": "Â¿CuÃ¡l es el siguiente nÃºmero en la serie: 2, 4, 8, 16, ...?",                                              "opciones": ["24", "28", "30", "32"],             "respuestaCorrecta": 3, "weight": 1 },
+      { "id": "A3", "bloque": "A. Razonamiento NumÃ©rico", "tema": "Porcentajes",       "reactivo": "Si un producto cuesta $200 y tiene 25% de descuento, Â¿cuÃ¡nto pagas?",                                     "opciones": ["$150", "$160", "$175", "$180"],        "respuestaCorrecta": 0, "weight": 1 },
+      { "id": "A4", "bloque": "A. Razonamiento NumÃ©rico", "tema": "ConversiÃ³n",       "reactivo": "Â¿CuÃ¡ntos minutos hay en 3.5 horas?",                                                                       "opciones": ["180", "200", "210", "220"],             "respuestaCorrecta": 2, "weight": 1 },
+      { "id": "A5", "bloque": "A. Razonamiento NumÃ©rico", "tema": "Porcentaje inverso","reactivo": "60 es el 80% de quÃ© nÃºmero?",                                                                              "opciones": ["65", "70", "75", "80"],                "respuestaCorrecta": 2, "weight": 1 },
+      { "id": "A6", "bloque": "A. Razonamiento NumÃ©rico", "tema": "MultiplicaciÃ³n",   "reactivo": "Si compro 4 boletos de $185 cada uno, Â¿cuÃ¡nto gasto en total?",                                            "opciones": ["$720", "$740", "$760", "$780"],         "respuestaCorrecta": 1, "weight": 1 },
+      { "id": "A7", "bloque": "A. Razonamiento NumÃ©rico", "tema": "Porcentajes",      "reactivo": "Â¿CuÃ¡l es el 15% de 240?",                                                                                  "opciones": ["24", "30", "36", "40"],                "respuestaCorrecta": 2, "weight": 1 },
+      { "id": "A8", "bloque": "A. Razonamiento NumÃ©rico", "tema": "Regla de tres",    "reactivo": "Si un auto recorre 60 km en 45 minutos, Â¿cuÃ¡ntos km recorrerÃ¡ en 1.5 horas?",                              "opciones": ["90", "100", "120", "150"],              "respuestaCorrecta": 2, "weight": 1 },
+      { "id": "A9", "bloque": "A. Razonamiento NumÃ©rico", "tema": "Series",           "reactivo": "La secuencia 5, 11, 17, 23, ... sigue con:",                                                                "opciones": ["27", "28", "29", "30"],                "respuestaCorrecta": 2, "weight": 1 },
+      { "id": "A10","bloque": "A. Razonamiento NumÃ©rico", "tema": "Fracciones",       "reactivo": "Si tengo 1/4 de pizza y me como la mitad, Â¿cuÃ¡nto me queda?",                                            "opciones": ["1/8", "1/6", "1/5", "1/4"],             "respuestaCorrecta": 0, "weight": 1 },
+
+      { "id": "B1", "bloque": "B. LÃ³gica Abstracta",       "tema": "Series geomÃ©tricas","reactivo": "Â¿QuÃ© nÃºmero falta en la serie: 3, 6, 12, 24, ...?",                                                       "opciones": ["36", "40", "48", "54"],                "respuestaCorrecta": 2, "weight": 1 },
+      { "id": "B2", "bloque": "B. LÃ³gica Abstracta",       "tema": "Secuencia alfabÃ©tica","reactivo": "Â¿QuÃ© letra sigue en la serie: A, C, F, J, ...?",                                                         "opciones": ["L", "M", "N", "O"],                    "respuestaCorrecta": 3, "weight": 1 },
+      { "id": "B3", "bloque": "B. LÃ³gica Abstracta",       "tema": "Patrones visuales","reactivo": "PatrÃ³n: â–³, â—‹, â–½, â—, â—¯, â–³, ... Â¿quÃ© sigue?",                                                              "opciones": ["â—‹", "â–½", "â—", "â—¯"],                     "respuestaCorrecta": 1, "weight": 1 },
+      { "id": "B4", "bloque": "B. LÃ³gica Abstracta",       "tema": "Impares",          "reactivo": "Â¿QuÃ© nÃºmero NO pertenece al grupo: 2, 4, 6, 9, 10?",                                                     "opciones": ["2", "4", "9", "10"],                    "respuestaCorrecta": 2, "weight": 1 },
+      { "id": "B5", "bloque": "B. LÃ³gica Abstracta",       "tema": "Cuadrados",        "reactivo": "Â¿QuÃ© nÃºmero falta? 1, 4, 9, 16, ...",                                                                    "opciones": ["20", "23", "25", "30"],                 "respuestaCorrecta": 2, "weight": 1 },
+      { "id": "B6", "bloque": "B. LÃ³gica Abstracta",       "tema": "Reversa",          "reactivo": "Serie: Z, Y, X, W, ... Â¿quÃ© sigue?",                                                                     "opciones": ["T", "U", "V", "W"],                     "respuestaCorrecta": 2, "weight": 1 },
+      { "id": "B7", "bloque": "B. LÃ³gica Abstracta",       "tema": "RotaciÃ³n",         "reactivo": "PatrÃ³n direccional: â†‘, â†’, â†“, â†, ... Â¿quÃ© sigue?",                                                       "opciones": ["â†‘", "â†’", "â†“", "â†—"],                     "respuestaCorrecta": 0, "weight": 1 },
+      { "id": "B8", "bloque": "B. LÃ³gica Abstracta",       "tema": "Sucesiones",       "reactivo": "Â¿QuÃ© nÃºmero falta? 2, 6, 12, 20, ...",                                                                  "opciones": ["26", "28", "30", "32"],                 "respuestaCorrecta": 2, "weight": 1 },
+      { "id": "B9", "bloque": "B. LÃ³gica Abstracta",       "tema": "CriptoaritmÃ©tica", "reactivo": "Si ROT13 codifica 'ABC' como 'NOP', entonces 'DEF' se codifica como:",                                    "opciones": ["QRS", "QRT", "RST", "STU"],            "respuestaCorrecta": 0, "weight": 1 },
+      { "id": "B10","bloque": "B. LÃ³gica Abstracta",       "tema": "Fibonacci",        "reactivo": "Serie Fibonacci: 1, 1, 2, 3, 5, 8, ... Â¿quÃ© sigue?",                                                    "opciones": ["11", "12", "13", "14"],                 "respuestaCorrecta": 2, "weight": 1 },
+
+      { "id": "C1", "bloque": "C. AtenciÃ³n",                "tema": "Conteo",           "reactivo": "Â¿CuÃ¡ntas letras 'a' hay en la palabra 'abracadabra'?",                                                  "opciones": ["3", "4", "5", "6"],                     "respuestaCorrecta": 2, "weight": 1 },
+      { "id": "C2", "bloque": "C. AtenciÃ³n",                "tema": "CategorÃ­as",       "reactivo": "Â¿CuÃ¡l palabra NO pertenece al grupo?",                                                                   "opciones": ["casa", "mesa", "silla", "perro"],        "respuestaCorrecta": 3, "weight": 1 },
+      { "id": "C3", "bloque": "C. AtenciÃ³n",                "tema": "Conteo",           "reactivo": "Â¿CuÃ¡ntas letras 'e' hay en la frase 'tres trigueros eran'?",                                            "opciones": ["3", "4", "5", "6"],                     "respuestaCorrecta": 1, "weight": 1 },
+      { "id": "C4", "bloque": "C. AtenciÃ³n",                "tema": "Patrones",         "reactivo": "Â¿QuÃ© nÃºmero sigue: 12, 14, 13, 15, 14, ...?",                                                          "opciones": ["15", "16", "17", "18"],                 "respuestaCorrecta": 1, "weight": 1 },
+      { "id": "C5", "bloque": "C. AtenciÃ³n",                "tema": "Sentido comÃºn",   "reactivo": "Detecta el error: 'El gato maulla, el perro ladra, el pato vuela.'",                                    "opciones": ["gato maulla", "perro ladra", "pato vuela", "no hay error"], "respuestaCorrecta": 2, "weight": 1 },
+      { "id": "C6", "bloque": "C. AtenciÃ³n",                "tema": "Primos",           "reactivo": "Â¿CuÃ¡ntos nÃºmeros primos hay entre 1 y 10?",                                                            "opciones": ["3", "4", "5", "6"],                     "respuestaCorrecta": 1, "weight": 1 },
+      { "id": "C7", "bloque": "C. AtenciÃ³n",                "tema": "Decimales",        "reactivo": "Â¿CuÃ¡l es el nÃºmero mÃ¡s alto?",                                                                            "opciones": ["1.5", "1.45", "1.501", "1.499"],         "respuestaCorrecta": 2, "weight": 1 },
+      { "id": "C8", "bloque": "C. AtenciÃ³n",                "tema": "MÃºltiplos",        "reactivo": "Secuencia: 7, 14, 21, 28, 35, 42, ... Â¿quÃ© sigue?",                                                    "opciones": ["46", "48", "49", "50"],                 "respuestaCorrecta": 2, "weight": 1 },
+      { "id": "C9", "bloque": "C. AtenciÃ³n",                "tema": "Conteo sÃ­labas",  "reactivo": "Â¿CuÃ¡ntas sÃ­labas tiene 'electroencefalografista'?",                                                   "opciones": ["8", "9", "10", "11"],                  "respuestaCorrecta": 2, "weight": 1 },
+      { "id": "C10","bloque": "C. AtenciÃ³n",                "tema": "DetecciÃ³n de error","reactivo": "Serie con error: 100, 81, 64, 49, 36, 25, 14. Â¿CuÃ¡l es el nÃºmero incorrecto?",                          "opciones": ["25", "16", "14", "49"],                 "respuestaCorrecta": 2, "weight": 1 }
+    ]
+  },
+
+  "disc": {
+    "codigo": "DISC-01",
+    "nombre": "Perfil DISC (Dominancia, Influencia, Estabilidad, Cumplimiento)",
+    "instrucciones": "Para cada frase, indica si te describe MÃS o MENOS.",
+    "ejes": {
+      "D": { "nombre": "Dominancia",  "descripcion": "OrientaciÃ³n a resultados, toma de decisiones, control, competencia." },
+      "I": { "nombre": "Influencia",  "descripcion": "Habilidades sociales, comunicaciÃ³n, persuasiÃ³n, trabajo en equipo." },
+      "S": { "nombre": "Estabilidad", "descripcion": "Paciencia, lealtad, consistencia, preferencia por entornos predecibles." },
+      "C": { "nombre": "Cumplimiento","descripcion": "PrecisiÃ³n, anÃ¡lisis, atenciÃ³n al detalle, apego a normas y procedimientos." }
+    },
+    "opciones": ["MÃ¡s", "Menos"],
+    "reactivos": [
+      { "id": "D1", "eje": "D", "reactivo": "Tomo decisiones con rapidez y sin dudar." },
+      { "id": "D2", "eje": "D", "reactivo": "Me siento cÃ³modo enfrentÃ¡ndome a personas difÃ­ciles." },
+      { "id": "D3", "eje": "D", "reactivo": "Prefiero dirigir antes que seguir instrucciones." },
+      { "id": "D4", "eje": "D", "reactivo": "Me molesta que las cosas se hagan con lentitud." },
+      { "id": "D5", "eje": "D", "reactivo": "Disfruto los retos y la competencia." },
+      { "id": "D6", "eje": "D", "reactivo": "Cuando hay un problema, actÃºo de inmediato." },
+
+      { "id": "I1", "eje": "I", "reactivo": "Conozco y saludo a mucha gente en eventos sociales." },
+      { "id": "I2", "eje": "I", "reactivo": "Me resulta fÃ¡cil hacer nuevos amigos." },
+      { "id": "I3", "eje": "I", "reactivo": "Me gusta convencer a otros de mis ideas." },
+      { "id": "I4", "eje": "I", "reactivo": "Expreso mis emociones abiertamente." },
+      { "id": "I5", "eje": "I", "reactivo": "Me siento cÃ³modo hablando en pÃºblico." },
+      { "id": "I6", "eje": "I", "reactivo": "La gente me describe como sociable y expresivo/a." },
+
+      { "id": "S1", "eje": "S", "reactivo": "Prefiero una rutina estable a cambios constantes." },
+      { "id": "S2", "eje": "S", "reactivo": "Soy una persona paciente y constante." },
+      { "id": "S3", "eje": "S", "reactivo": "Me disgustan los conflictos y busco armonÃ­a." },
+      { "id": "S4", "eje": "S", "reactivo": "Soy leal con mis compaÃ±eros de trabajo." },
+      { "id": "S5", "eje": "S", "reactivo": "Prefiero escuchar antes que hablar en una reuniÃ³n." },
+      { "id": "S6", "eje": "S", "reactivo": "Me considero una persona calmada bajo presiÃ³n." },
+
+      { "id": "C1", "eje": "C", "reactivo": "Reviso varias veces mi trabajo antes de entregarlo." },
+      { "id": "C2", "eje": "C", "reactivo": "Sigo las reglas al pie de la letra." },
+      { "id": "C3", "eje": "C", "reactivo": "Me molesta el desorden y la improvisaciÃ³n." },
+      { "id": "C4", "eje": "C", "reactivo": "Soy detallista y analÃ­tico en mi trabajo." },
+      { "id": "C5", "eje": "C", "reactivo": "Prefiero tener toda la informaciÃ³n antes de decidir." },
+      { "id": "C6", "eje": "C", "reactivo": "Considero importante documentar los procesos." }
+    ]
+  }
+,
+  "motivadores": {
+    "codigo": "MOT-01",
+    "nombre": "Motivadores y Estilo de Trabajo",
+    "tipo": "likert_ponderado",
+    "escala": { "min": 1, "max": 5, "labels": ["Totalmente en desacuerdo", "En desacuerdo", "Neutral", "De acuerdo", "Totalmente de acuerdo"] },
+    "reactivos": [
+      { "id": "MOT-1",  "dimension": "1. Reconocimiento y Estatus",      "reactivo": "Me siento mC)s satisfecho cuando mi trabajo y mis logros son reconocidos pC:blicamente frente al equipo.",        "isInverted": false, "weight": 1 },
+      { "id": "MOT-2",  "dimension": "1. Reconocimiento y Estatus",      "reactivo": "Me desmotiva mucho que mis superiores no noten el esfuerzo extra que pongo en mis tareas.",                     "isInverted": false, "weight": 1 },
+      { "id": "MOT-3",  "dimension": "1. Reconocimiento y Estatus",      "reactivo": "Prefiero pasar completamente desapercibido mientras haga bien mi trabajo.",                                    "isInverted": true,  "weight": 1 },
+
+      { "id": "MOT-4",  "dimension": "2. Impulso EconC3mico y Seguridad",  "reactivo": "El dinero y las compensaciones econC3micas son mi principal motor para dar el esfuerzo extra.",                "isInverted": false, "weight": 1 },
+      { "id": "MOT-5",  "dimension": "2. Impulso EconC3mico y Seguridad",  "reactivo": "Prefiero un trabajo muy estable y seguro por encima de un puesto con mucho riesgo y comisiones altas.",      "isInverted": false, "weight": 1 },
+      { "id": "MOT-6",  "dimension": "2. Impulso EconC3mico y Seguridad",  "reactivo": "AceptarC-a un sueldo ligeramente menor si el proyecto me apasiona profundamente.",                                "isInverted": true,  "weight": 1 },
+
+      { "id": "MOT-7",  "dimension": "3. Crecimiento y Retos",           "reactivo": "Busco siempre oportunidades para aprender cosas nuevas, incluso si no significa un aumento de sueldo inmediato.", "isInverted": false, "weight": 1 },
+      { "id": "MOT-8",  "dimension": "3. Crecimiento y Retos",           "reactivo": "Suelo perder la motivaciC3n rC!pidamente si no tengo retos intelectuales nuevos constantemente.",                  "isInverted": false, "weight": 1 },
+      { "id": "MOT-9",  "dimension": "3. Crecimiento y Retos",           "reactivo": "Prefiero un trabajo donde haga exactamente lo mismo todos los dC-as sin sorpresas ni cambios de rutina.",      "isInverted": true,  "weight": 1 },
+
+      { "id": "MOT-10", "dimension": "4. AutonomC-a vs. Dependencia",     "reactivo": "Disfruto organizar mi propio tiempo y establecer mis metas sin que me estC)n supervisando constantemente.",     "isInverted": false, "weight": 1 },
+      { "id": "MOT-11", "dimension": "4. AutonomC-a vs. Dependencia",     "reactivo": "Siento una gran satisfacciC3n personal cuando ayudo a mis compaC1eros a alcanzar los objetivos del grupo.",      "isInverted": false, "weight": 1 },
+      { "id": "MOT-12", "dimension": "4. AutonomC-a vs. Dependencia",     "reactivo": "Prefiero trabajar en proyectos 100% individuales donde no dependo del ritmo ni los errores de otras personas.",  "isInverted": true,  "weight": 1 }
+    ]
+  },
+
+  "liderazgo": {
+    "codigo": "LID-01",
+    "nombre": "Liderazgo y Toma de Decisiones",
+    "tipo": "likert_ponderado",
+    "escala": { "min": 1, "max": 5, "labels": ["Totalmente en desacuerdo", "En desacuerdo", "Neutral", "De acuerdo", "Totalmente de acuerdo"] },
+    "reactivos": [
+      { "id": "LID-1", "dimension": "1. AsunciC3n de Responsabilidades", "reactivo": "Disfruto asumiendo la responsabilidad de guiar a un equipo hacia sus metas, incluso bajo presiC3n.",        "isInverted": false, "weight": 1 },
+      { "id": "LID-2", "dimension": "1. AsunciC3n de Responsabilidades", "reactivo": "Asumo la responsabilidad total cuando mi equipo comete un error, en lugar de culparlos pC:blicamente.",   "isInverted": false, "weight": 1 },
+      { "id": "LID-3", "dimension": "1. AsunciC3n de Responsabilidades", "reactivo": "Prefiero que mis superiores tomen las decisiones difC-ciles para evitar generar conflictos con mis compaC1eros.", "isInverted": true,  "weight": 1 },
+
+      { "id": "LID-4", "dimension": "2. DelegaciC3n y Desarrollo de Otros", "reactivo": "Suelo delegar tareas importantes porque confC-o plenamente en las capacidades de mi equipo.",               "isInverted": false, "weight": 1 },
+      { "id": "LID-5", "dimension": "2. DelegaciC3n y Desarrollo de Otros", "reactivo": "Fomento que mi equipo proponga soluciones en lugar de darles yo todas las respuestas.",                    "isInverted": false, "weight": 1 },
+      { "id": "LID-6", "dimension": "2. DelegaciC3n y Desarrollo de Otros", "reactivo": "Creo que la mejor forma de asegurar que un proyecto salga bien es hiC)ndolo yo mismo.",                   "isInverted": true,  "weight": 1 },
+
+      { "id": "LID-7", "dimension": "3. Pensamiento EstratC)gico",       "reactivo": "Analizo diferentes escenarios y mido los datos antes de tomar una decisiC3n importante.",                     "isInverted": false, "weight": 1 },
+      { "id": "LID-8", "dimension": "3. Pensamiento EstratC)gico",       "reactivo": "Me enfoco en planificar los objetivos de mi C!rea a largo plazo, no solo en resolver el trabajo del dC-a a dC-a.", "isInverted": false, "weight": 1 },
+      { "id": "LID-9", "dimension": "3. Pensamiento EstratC)gico",       "reactivo": "Suelo tomar decisiones basC!ndome C:nicamente en mi intuiciC3n y urgencia, sin detenerme a revisar los nC:meros.", "isInverted": true,  "weight": 1 },
+
+      { "id": "LID-10","dimension": "4. Manejo de Crisis",               "reactivo": "Mantengo la cabeza frC-a y ayudo a enfocar a mi equipo cuando hay una emergencia operativa.",                "isInverted": false, "weight": 1 },
+      { "id": "LID-11","dimension": "4. Manejo de Crisis",               "reactivo": "Me resulta fC!cil adaptar el plan de trabajo rC!pidamente cuando surgen problemas inesperados.",                "isInverted": false, "weight": 1 },
+      { "id": "LID-12","dimension": "4. Manejo de Crisis",               "reactivo": "Cuando ocurre una crisis, suelo paralizarme esperando a que alguien de mayor rango dC) las instrucciones.",   "isInverted": true,  "weight": 1 }
+    ]
+  },
+
+  "ventas": {
+    "codigo": "VEN-01",
+    "nombre": "Ventas y NegociaciC3n",
+    "tipo": "likert_ponderado",
+    "escala": { "min": 1, "max": 5, "labels": ["Totalmente en desacuerdo", "En desacuerdo", "Neutral", "De acuerdo", "Totalmente de acuerdo"] },
+    "reactivos": [
+      { "id": "VEN-1", "dimension": "1. Empuje y ProspecciC3n",     "reactivo": "Me siento cC3modo y seguro acercC!ndome a personas desconocidas para ofrecerles un producto o servicio.",   "isInverted": false, "weight": 1 },
+      { "id": "VEN-2", "dimension": "1. Empuje y ProspecciC3n",     "reactivo": "Disfruto establecer el contacto inicial para buscar activamente nuevas oportunidades de negocio.",     "isInverted": false, "weight": 1 },
+      { "id": "VEN-3", "dimension": "1. Empuje y ProspecciC3n",     "reactivo": "Prefiero hacer trabajo administrativo o de oficina antes que tener que hacer llamadas de prospecciC3n en frC-o.", "isInverted": true,  "weight": 1 },
+
+      { "id": "VEN-4", "dimension": "2. Resiliencia al Rechazo",     "reactivo": "Veo un 'no' inicial del cliente como una oportunidad para intentarlo desde otro C!ngulo.",                "isInverted": false, "weight": 1 },
+      { "id": "VEN-5", "dimension": "2. Resiliencia al Rechazo",     "reactivo": "Me recupero rC!pidamente anC-micamente y paso al siguiente prospecto si pierdo una venta importante.",   "isInverted": false, "weight": 1 },
+      { "id": "VEN-6", "dimension": "2. Resiliencia al Rechazo",     "reactivo": "Me desanimo rC!pidamente y pierdo el ritmo cuando un prospecto me rechaza de forma cortante.",        "isInverted": true,  "weight": 1 },
+
+      { "id": "VEN-7", "dimension": "3. Manejo de Objeciones",      "reactivo": "Escucho atentamente las dudas del cliente para poder argumentar inteligentemente a favor de mi producto.",  "isInverted": false, "weight": 1 },
+      { "id": "VEN-8", "dimension": "3. Manejo de Objeciones",      "reactivo": "Disfruto el proceso de negociar para llegar a un acuerdo donde ambas partes sientan que ganaron.",       "isInverted": false, "weight": 1 },
+      { "id": "VEN-9", "dimension": "3. Manejo de Objeciones",      "reactivo": "Me resulta muy difC-cil rebatir las objeciones de un cliente que duda mucho antes de comprar.",         "isInverted": true,  "weight": 1 },
+
+      { "id": "VEN-10","dimension": "4. Cierre y OrientaciC3n a Metas","reactivo": "Me mantengo persistente en el seguimiento de un prospecto hasta obtener una respuesta de compra definitiva.", "isInverted": false, "weight": 1 },
+      { "id": "VEN-11","dimension": "4. Cierre y OrientaciC3n a Metas","reactivo": "Veo las metas de ventas altas como un reto emocionante en lugar de verlas como una carga inalcanzable.",   "isInverted": false, "weight": 1 },
+      { "id": "VEN-12","dimension": "4. Cierre y OrientaciC3n a Metas","reactivo": "Me incomoda o me da mucha pena tener que presionar al cliente para que finalice su compra.",             "isInverted": true,  "weight": 1 }
+    ]
+  },
+
+  "trato_cliente": {
+    "codigo": "TC-01",
+    "nombre": "Trato al Cliente y Habilidades Interpersonales",
+    "tipo": "likert_ponderado",
+    "escala": { "min": 1, "max": 5, "labels": ["Totalmente en desacuerdo", "En desacuerdo", "Neutral", "De acuerdo", "Totalmente de acuerdo"] },
+    "reactivos": [
+      { "id": "TC-1", "dimension": "1. empatC-a y ConexiC3n",         "reactivo": "Siento empatC-a genuina por los problemas y frustraciones que me plantean los clientes.",                        "isInverted": false, "weight": 1 },
+      { "id": "TC-2", "dimension": "1. empatC-a y ConexiC3n",         "reactivo": "Escucho activamente a las personas, sin interrumpirlas, hasta que terminan de explicar su problema.",        "isInverted": false, "weight": 1 },
+      { "id": "TC-3", "dimension": "1. empatC-a y ConexiC3n",         "reactivo": "Suelo tomarme de manera personal y ofenderme por las quejas que hacen los clientes sobre la marca.",        "isInverted": true,  "weight": 1 },
+
+      { "id": "TC-4", "dimension": "2. Paciencia y Tolerancia",       "reactivo": "Mantengo un tono de voz amable y calmado, incluso si el cliente estC! claramente molesto o siendo grosero.", "isInverted": false, "weight": 1 },
+      { "id": "TC-5", "dimension": "2. Paciencia y Tolerancia",       "reactivo": "Tengo la disposiciC3n de repetir la informaciC3n las veces que sea necesario para que el cliente lo entienda.", "isInverted": false, "weight": 1 },
+      { "id": "TC-6", "dimension": "2. Paciencia y Tolerancia",       "reactivo": "Pierdo la paciencia rC!pidamente si un cliente me pide que le explique lo mismo en repetidas ocasiones.",   "isInverted": true,  "weight": 1 },
+
+      { "id": "TC-7", "dimension": "3. OrientaciC3n a Soluciones",    "reactivo": "Siempre busco soluciones alternativas si no puedo darle al cliente exactamente lo que pide de inmediato.",     "isInverted": false, "weight": 1 },
+      { "id": "TC-8", "dimension": "3. OrientaciC3n a Soluciones",    "reactivo": "Me anticipo a las necesidades de las personas para ofrecer un servicio que supere sus expectativas.",         "isInverted": false, "weight": 1 },
+      { "id": "TC-9", "dimension": "3. OrientaciC3n a Soluciones",    "reactivo": "Creo que el cliente no siempre tiene la razC3n y no dudo en hacC)rselo saber directamente y sin tacto.",   "isInverted": true,  "weight": 1 },
+
+      { "id": "TC-10","dimension": "4. Actitud de Servicio",          "reactivo": "Disfruto genuinamente interactuando con diferentes tipos de personas todos los dC-as.",                       "isInverted": false, "weight": 1 },
+      { "id": "TC-11","dimension": "4. Actitud de Servicio",          "reactivo": "Me esfuerzo en asegurar que el cliente se vaya con una sonrisa y una excelente impresiC3n del servicio.",   "isInverted": false, "weight": 1 },
+      { "id": "TC-12","dimension": "4. Actitud de Servicio",          "reactivo": "Me desgasta profundamente a nivel emocional tener que ser amable durante toda mi jornada de trabajo.",      "isInverted": true,  "weight": 1 }
+    ]
+  }
+}

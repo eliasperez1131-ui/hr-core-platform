@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-white text-ink-900 antialiased;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+  ::selection {
+    @apply bg-brand-500/30 text-white;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  /* ============================================================
+     PRINT STYLES — para react-to-print
+     Oculta sidebar, botones, tabs y deja solo el contenido
+     ============================================================ */
+  @media print {
+    html, body {
+      background: white !important;
+      color: #0b1020 !important;
+    }
+    .no-print,
+    nav,
+    header.app-header,
+    aside,
+    [role="tablist"] {
+      display: none !important;
+    }
+    .print-break {
+      page-break-before: always;
+    }
+    section {
+      break-inside: avoid;
+    }
+    .recharts-wrapper svg {
+      max-width: 100% !important;
+    }
+  }
+}
