@@ -1,42 +1,19 @@
 #!/bin/bash
-# scripts/total-rebuild.sh
+# scripts/total-rebuild.sh  (VERSIÓN 2 — FIX ABORTO PREMATURO)
 # ============================================================
 #  HR CORE — Demolición total + reconstrucción desde cero
 # ============================================================
-#  ⚠️  ADVERTENCIA: ESTE SCRIPT ES DESTRUCTIVO
-#  ⚠️  Va a borrar /var/www/html, configs de Nginx y certs SSL
-#  ⚠️  El sitio hrcore.com.mx estará CAÍDO durante ~15-30 minutos
-# ============================================================
-#  LO QUE HACE (en orden):
-#  1. Backup final (configs + certs + código)
-#  2. Mata procesos PM2 y node viejos
-#  3. Borra código de app en /var/www/html
-#  4. PURGA Nginx, Certbot y configs
-#  5. Reinstala Node.js 20, Nginx, Certbot
-#  6. Clona HR CORE desde feat/vps-migration
-#  7. Crea .env.production con placeholders
-#  8. Build + PM2 start
-#  9. Reconfigura Nginx para hrcore.com.mx
-#  10. Reemite certs Let's Encrypt con Certbot
-#  11. Verifica todo
-# ============================================================
-#  LO QUE NO TOCA:
-#  - MySQL (la BD hrcore_db sigue intacta)
-#  - SSH / red / firewall
-#  - Certbot ya no existente (se reinstala)
-# ============================================================
-#  USO:
-#    1) Subir el script:
-#         scp scripts/total-rebuild.sh root@177.7.33.146:/tmp/
-#    2) Conectarse:
-#         ssh root@177.7.33.146
-#    3) Confirmar que tienes backup de la BD:
-#         ls -lh /root/hrcore_db.sql
-#    4) Ejecutar:
-#         bash /tmp/total-rebuild.sh
+#  ⚠️  ADVERTENCIA: DESTRUCTIVO.  El sitio estará caído 15-30 min.
+#  ⚠️  Lo que se BORRA:  código viejo, Nginx, certs, PM2
+#  ⚠️  Lo que se PRESERVA: MySQL, BD hrcore_db, SSH, red
 # ============================================================
 
-set -e
+# IMPORTANTE: set -e + set -u pueden abortar prematuramente con
+# comandos que devuelven exit codes raros. Usamos verificación manual.
+
+set +e  # <-- NO abortar en errores. Verificamos manualmente.
+set +u
+set -o pipefail  # Solo errores de pipe aborten, no exit codes individuales
 
 REPO_URL="https://github.com/eliasperez1131-ui/hr-core-platform.git"
 BRANCH="feat/vps-migration"
@@ -54,23 +31,28 @@ NC='\033[0m'
 LOG()  { echo -e "${GREEN}[$(date +%H:%M:%S)]${NC} $*"; }
 WARN() { echo -e "${YELLOW}⚠${NC} $*"; }
 ERR()  { echo -e "${RED}✗${NC} $*"; }
+DONE() { echo -e "${GREEN}✓${NC} $*"; }
 
 # ============================================================
-#  Pre-flight checks (NO modifica nada)
+#  Pre-flight: usuario debe confirmar
 # ============================================================
-LOG "=== HR CORE · Demolición + Reconstrucción Total ==="
+clear
+echo "================================================="
+echo "  HR CORE · Demolición + Reconstrucción Total"
+echo "================================================="
 echo ""
-WARN "Este script va a:"
-echo "  - Detener todos los procesos PM2"
-echo "  - Borrar /var/www/html (código de app)"
-echo "  - Purgar Nginx, configs y certs Let's Encrypt"
-echo "  - Reinstalar Node, PM2, Nginx, Certbot"
-echo "  - Clonar HR CORE, build, arrancar"
-echo "  - Reconfigurar Nginx + reemitir SSL"
+WARN "Este script es DESTRUCTIVO. Va a:"
+echo "   1. Hacer backup de todo"
+echo "   2. Matar procesos PM2 y node del proyecto"
+echo "   3. Borrar /var/www/html (código)"
+echo "   4. Purgar Nginx + certs Let's Encrypt"
+echo "   5. Reinstalar Node 20, PM2, Nginx, Certbot"
+echo "   6. Clonar HR CORE + build + arrancar"
+echo "   7. Reconfigurar Nginx para hrcore.com.mx"
+echo "   8. Reemitir SSL con Certbot"
 echo ""
 WARN "El sitio hrcore.com.mx estará CAÍDO durante ~15-30 minutos."
 echo ""
-
 read -p "¿Continuar? (escribe 'SI' para continuar): " CONFIRM
 if [ "$CONFIRM" != "SI" ]; then
   echo "Cancelado por el usuario."
@@ -78,94 +60,122 @@ if [ "$CONFIRM" != "SI" ]; then
 fi
 
 # ============================================================
-#  0. Backup final (CRÍTICO)
+#  0. Backup final (CRÍTICO) — se hace PRIMERO y completamente
 # ============================================================
+LOG ""
 LOG "0. Backup final (CRÍTICO)..."
+
 TS=$(date +%Y%m%d-%H%M%S)
 BACKUP_DIR="$BACKUP_ROOT/total-rebuild-$TS"
-mkdir -p "$BACKUP_DIR"
+mkdir -p "$BACKUP_DIR" 2>/dev/null
+DONE "  Backup dir: $BACKUP_DIR"
 
-# Backup BD MySQL
-WARN "Respaldando BD MySQL (hrcore_db)..."
+# Backup BD MySQL (es la unica fuente de datos que NO vamos a perder)
+WARN "  Respaldando BD MySQL (hrcore_db)..."
 if command -v mysqldump >/dev/null 2>&1; then
   mysqldump -uroot -p'123456' --single-transaction --routines --triggers \
     --add-drop-database --databases hrcore_db \
     > "$BACKUP_DIR/hrcore_db.sql" 2>/dev/null
-  LOG "  ✓ BD respaldada: $BACKUP_DIR/hrcore_db.sql"
+  if [ -s "$BACKUP_DIR/hrcore_db.sql" ]; then
+    DONE "  BD respaldada: $(du -sh $BACKUP_DIR/hrcore_db.sql | cut -f1)"
+  else
+    WARN "  mysqldump no generó output (¿BD vacía o credenciales?)"
+  fi
+else
+  WARN "  mysqldump no encontrado, saltando backup de BD"
 fi
 
 # Backup código viejo (si existe)
 if [ -d "$APP_DIR" ]; then
-  cp -r "$APP_DIR" "$BACKUP_DIR/app-vieja" 2>/dev/null || true
-  LOG "  ✓ Código viejo respaldado: $BACKUP_DIR/app-vieja"
+  cp -r "$APP_DIR" "$BACKUP_DIR/app-vieja" 2>/dev/null
+  DONE "  Código viejo respaldado"
 fi
 
 # Backup configs de Nginx (por si algo sale mal)
 if [ -d /etc/nginx ]; then
-  cp -r /etc/nginx "$BACKUP_DIR/nginx-vieja" 2>/dev/null || true
-  LOG "  ✓ Nginx viejo respaldado: $BACKUP_DIR/nginx-vieja"
+  cp -r /etc/nginx "$BACKUP_DIR/nginx-viejo" 2>/dev/null
+  DONE "  Configs de Nginx respaldados"
 fi
 
-# Backup certs Let's Encrypt (los viejos, expirados o no)
+# Backup certs Let's Encrypt (los viejos, expirados)
 if [ -d /etc/letsencrypt ]; then
-  cp -r /etc/letsencrypt "$BACKUP_DIR/letsencrypt-viejo" 2>/dev/null || true
-  LOG "  ✓ Certs viejos respaldados: $BACKUP_DIR/letsencrypt-viejo"
+  cp -r /etc/letsencrypt "$BACKUP_DIR/letsencrypt-viejo" 2>/dev/null
+  DONE "  Certs Let's Encrypt respaldados"
 fi
 
-# Backup lista de paquetes instalados
+# Backup lista de paquetes
 dpkg --get-selections > "$BACKUP_DIR/packages.list" 2>/dev/null
-LOG "  ✓ Lista de paquetes guardada"
 
-# Backup del crontab
+# Backup crontab
 crontab -l > "$BACKUP_DIR/crontab.bak" 2>/dev/null
+
 LOG ""
-LOG "  Todo respaldado en: $BACKUP_DIR"
+DONE "  BACKUP COMPLETO en: $BACKUP_DIR"
+LOG "  Ahora sí empieza la demolición."
 
 # ============================================================
-#  1. Matar todos los procesos PM2 y node
+#  1. Matar procesos PM2 (SEGURO, sin matar node genérico)
 # ============================================================
 LOG ""
-LOG "1. Matando procesos PM2 y node..."
-pm2 kill 2>/dev/null || true
-pm2 uninstall 2>/dev/null || true
+LOG "1. Matando procesos PM2..."
+
+# Solo PM2, sin tocar 'node' genérico
+if command -v pm2 >/dev/null 2>&1; then
+  pm2 kill 2>/dev/null
+  sleep 2
+  pm2 list 2>/dev/null | head -5
+  DONE "  PM2 detenido (pm2 kill)"
+else
+  WARN "  PM2 no instalado, saltando"
+fi
+
+# Verificar que el puerto 3000 esté libre
 sleep 1
-pkill -9 -f "next start" 2>/dev/null || true
-pkill -9 -f "node " 2>/dev/null || true
-LOG "  ✓ Procesos matados"
+if ss -tlnp 2>/dev/null | grep -q ":$PORT "; then
+  WARN "  Puerto $PORT aún en uso. Puede haber un proceso node residual."
+  echo "  Procesos en puerto $PORT:"
+  ss -tlnp 2>/dev/null | grep ":$PORT " | head -3
+  # Intentar matar solo lo que esté en el puerto
+  PID_3000=$(ss -tlnp 2>/dev/null | grep ":$PORT " | grep -oP 'pid=\K[0-9]+' | head -1)
+  if [ -n "$PID_3000" ]; then
+    WARN "  Matando PID $PID_3000 (puerto $PORT)..."
+    kill -9 "$PID_3000" 2>/dev/null
+    sleep 1
+  fi
+fi
 
 # ============================================================
-#  2. Purgar código de la app
+#  2. Purgar código de la app (sin tocar MySQL)
 # ============================================================
 LOG ""
-LOG "2. Purgando /var/www/html..."
+LOG "2. Purgando $APP_DIR..."
 if [ -d "$APP_DIR" ]; then
   rm -rf "$APP_DIR" 2>/dev/null
-  mkdir -p "$APP_DIR"
-  LOG "  ✓ /var/www/html limpio"
-else
-  mkdir -p "$APP_DIR"
-  LOG "  - /var/www/html no existía, creado"
 fi
+mkdir -p "$APP_DIR" 2>/dev/null
+DONE "  $APP_DIR limpio"
 
 # ============================================================
-#  3. Purgar Nginx, configs y certs
+#  3. Purgar Nginx, configs y certs (deja PM2 daemon, red, SSH intactos)
 # ============================================================
 LOG ""
-LOG "3. Purgando Nginx y certs..."
+LOG "3. Purgando Nginx, configs y certs..."
 
-# Detener Nginx
-systemctl stop nginx 2>/dev/null || true
-systemctl disable nginx 2>/dev/null || true
-sleep 1
+# Detener Nginx PRIMERO
+if systemctl list-units --type=service 2>/dev/null | grep -q nginx; then
+  systemctl stop nginx 2>/dev/null
+  systemctl disable nginx 2>/dev/null
+  sleep 1
+fi
 
 # Purgar paquetes (--purge borra también configs)
-DEBIAN_FRONTEND=noninteractive apt-get remove --purge -y \
-  nginx nginx-common nginx-core nginx-full 2>/dev/null || true
-DEBIAN_FRONTEND=noninteractive apt-get remove --purge -y \
-  certbot python3-certbot-nginx 2>/dev/null || true
-DEBIAN_FRONTEND=noninteractive apt-get autoremove -y 2>/dev/null || true
+WARN "  apt-get remove --purge nginx + certbot..."
+export DEBIAN_FRONTEND=noninteractive
+apt-get remove --purge -y nginx nginx-common nginx-core nginx-full >/dev/null 2>&1
+apt-get remove --purge -y certbot python3-certbot-nginx >/dev/null 2>&1
+apt-get autoremove -y >/dev/null 2>&1
 
-# Limpiar configs residuales
+# Borrar configs residuales
 rm -rf /etc/nginx /var/log/nginx /var/lib/nginx 2>/dev/null
 rm -rf /etc/letsencrypt /var/log/letsencrypt /var/lib/letsencrypt 2>/dev/null
 
@@ -175,43 +185,42 @@ rm -f /etc/systemd/system/certbot.timer 2>/dev/null
 rm -f /etc/systemd/system/certbot.service 2>/dev/null
 systemctl daemon-reload 2>/dev/null
 
-LOG "  ✓ Nginx, certs y configs purgados"
+DONE "  Nginx y certs purgados"
 
 # ============================================================
 #  4. Reinstalar todo (Node 20, PM2, Nginx, Certbot)
 # ============================================================
 LOG ""
 LOG "4. Actualizando apt e instalando dependencias..."
-export DEBIAN_FRONTEND=noninteractive
 apt-get update -y >/dev/null 2>&1
 apt-get upgrade -y >/dev/null 2>&1
 
 # Nginx + Certbot
+LOG "  Instalando Nginx + Certbot..."
 apt-get install -y nginx certbot python3-certbot-nginx >/dev/null 2>&1
 systemctl enable nginx 2>/dev/null
 
-# Node 20 (via NodeSource)
+# Node 20
+LOG "  Verificando Node.js 20..."
 if ! command -v node >/dev/null 2>&1 || [ "$(node -v 2>/dev/null | cut -d. -f1 | tr -d 'v')" -lt 20 ]; then
-  LOG "  Instalando Node.js 20..."
   curl -fsSL https://deb.nodesource.com/setup_20.x | bash - >/dev/null 2>&1
   apt-get install -y nodejs >/dev/null 2>&1
 fi
 
-# PM2 global
+# PM2
+LOG "  Verificando PM2..."
 if ! command -v pm2 >/dev/null 2>&1; then
-  LOG "  Instalando PM2 global..."
   npm install -g pm2 >/dev/null 2>&1
 fi
 
 # Git
 apt-get install -y git >/dev/null 2>&1
 
-# Verificar versiones
-LOG "  ✓ Node $(node -v)"
-LOG "  ✓ npm $(npm -v)"
-LOG "  ✓ pm2 $(pm2 -v)"
-LOG "  ✓ nginx $(nginx -v 2>&1 | cut -d'/' -f2)"
-LOG "  ✓ certbot $(certbot --version 2>&1 | head -1)"
+DONE "  Node $(node -v 2>/dev/null || echo '?')"
+DONE "  npm $(npm -v 2>/dev/null || echo '?')"
+DONE "  pm2 $(pm2 -v 2>/dev/null | head -1 || echo '?')"
+DONE "  nginx $(nginx -v 2>&1 | cut -d'/' -f2)"
+DONE "  certbot $(certbot --version 2>&1 | head -1 | cut -d' ' -f2)"
 
 # ============================================================
 #  5. Clonar HR CORE
@@ -226,13 +235,13 @@ if ! git clone --depth 1 --branch "$BRANCH" "$REPO_URL" html 2>/dev/null; then
   fi
 fi
 cd html
-LOG "  ✓ Clonado en $(git rev-parse --short HEAD)"
+DONE "  Clonado en $(git rev-parse --short HEAD)"
 
 # ============================================================
 #  6. Instalar dependencias
 # ============================================================
 LOG ""
-LOG "6. Instalando dependencias npm (esto puede tardar 1-2 min)..."
+LOG "6. Instalando dependencias npm (1-2 min)..."
 npm install --omit=dev --no-audit --no-fund 2>&1 | tail -5
 
 # ============================================================
@@ -245,7 +254,7 @@ cat > $APP_DIR/.env.production <<'EOF'
 # ============================================================
 #  HR CORE — Variables de Producción (VPS)
 # ============================================================
-#  ⚠️  EDITA ESTE ARCHIVO CON TUS CLAVES REALES
+#  ⚠️  EDITA ESTE ARCHIVO CON TUS CLAVES REALES ANTES DEL 1er RESTART
 #  ⚠️  NO COMMITEAR - está en .gitignore
 # ============================================================
 
@@ -273,9 +282,8 @@ SMTP_USER=noreply@hrcore.com.mx
 SMTP_PASSWORD=TU_SMTP_PASSWORD
 FROM_EMAIL=noreply@hrcore.com.mx
 EOF
-
-chmod 600 $APP_DIR/.env.production
-LOG "  ✓ .env.production creado (permisos 600)"
+chmod 600 $APP_DIR/.env.production 2>/dev/null
+DONE "  .env.production creado (permisos 600)"
 
 # ============================================================
 #  8. Compilar Next.js
@@ -288,10 +296,10 @@ if [ ! -d "$APP_DIR/.next" ]; then
   ERR "Build falló: no existe .next/"
   exit 1
 fi
-LOG "  ✓ Build OK: $(du -sh .next | cut -f1)"
+DONE "  Build OK: $(du -sh .next | cut -f1)"
 
 # ============================================================
-#  9. Crear ecosystem.config.js para PM2
+#  9. Configurar PM2
 # ============================================================
 LOG ""
 LOG "9. Configurando PM2..."
@@ -318,21 +326,22 @@ module.exports = {
 };
 EOF
 
+cd $APP_DIR
+pm2 delete $APP_NAME 2>/dev/null
 pm2 start ecosystem.config.js
-pm2 save
-pm2 startup systemd >/dev/null 2>&1 || true
-pm2 save
+pm2 save >/dev/null 2>&1
+pm2 startup systemd >/dev/null 2>&1
+pm2 save >/dev/null 2>&1
 
-# Esperar warm-up
 sleep 5
 
 # Health check local
-if curl -s -o /dev/null -w "  HTTP %{http_code} en %{time_total}s\n" \
-   http://127.0.0.1:3000/ 2>/dev/null; then
-  LOG "  ✓ App respondiendo en :3000"
+if curl -s -o /dev/null -w "  HTTP %{http_code} en %{time_total}s\n" http://127.0.0.1:3000/ 2>/dev/null; then
+  DONE "  App respondiendo en :3000"
 else
   WARN "  App aún no responde (puede estar warm-up)"
-  pm2 logs $APP_NAME --lines 30 --nostream --raw 2>/dev/null | tail -20
+  echo "  --- últimas líneas de log ---"
+  pm2 logs $APP_NAME --lines 30 --nostream --raw 2>/dev/null | tail -25
 fi
 
 # ============================================================
@@ -342,7 +351,7 @@ LOG ""
 LOG "10. Configurando Nginx para $DOMAIN..."
 
 # Eliminar default
-rm -f /etc/nginx/sites-enabled/default
+rm -f /etc/nginx/sites-enabled/default 2>/dev/null
 
 cat > /etc/nginx/sites-available/$DOMAIN <<'NGINX'
 # HR CORE - Reverse proxy a Next.js (puerto 3000)
@@ -390,19 +399,19 @@ server {
 NGINX
 
 # Activar sitio
-ln -sf /etc/nginx/sites-available/$DOMAIN /etc/nginx/sites-enabled/$DOMAIN
+ln -sf /etc/nginx/sites-available/$DOMAIN /etc/nginx/sites-enabled/$DOMAIN 2>/dev/null
 
 # Validar config
 nginx -t 2>&1 | head -3
 
 # Reiniciar Nginx
-systemctl restart nginx
+systemctl restart nginx 2>/dev/null
 sleep 2
 
-if systemctl is-active --quiet nginx; then
-  LOG "  ✓ Nginx corriendo"
+if systemctl is-active --quiet nginx 2>/dev/null; then
+  DONE "  Nginx corriendo"
 else
-  ERR "Nginx no arrancó. Revisa: journalctl -u nginx"
+  ERR "Nginx no arrancó. Revisa: journalctl -u nginx -n 30"
   exit 1
 fi
 
@@ -412,26 +421,24 @@ fi
 LOG ""
 LOG "11. Reemitiendo certificados SSL con Certbot..."
 
-# Certbot automático con Nginx
 certbot --nginx \
   -d $DOMAIN \
   -d www.$DOMAIN \
   --non-interactive \
   --agree-tos \
   --email admin@$DOMAIN \
-  --redirect 2>&1 | tail -10
+  --redirect 2>&1 | tail -15
 
 if [ -d /etc/letsencrypt/live/$DOMAIN ]; then
-  LOG "  ✓ Certs SSL emitidos para $DOMAIN"
-  ls -la /etc/letsencrypt/live/$DOMAIN/
+  DONE "  Certs SSL emitidos"
 else
   ERR "Certbot falló. Revisa: certbot certificates"
   exit 1
 fi
 
-# Auto-renovación
-systemctl enable certbot.timer 2>/dev/null || true
-systemctl start certbot.timer 2>/dev/null || true
+# Auto-renovación timer
+systemctl enable certbot.timer 2>/dev/null
+systemctl start certbot.timer 2>/dev/null
 
 # ============================================================
 #  12. Verificación final
@@ -442,14 +449,14 @@ LOG "12. Verificación final..."
 echo ""
 echo "  ESTADO DE SERVICIOS:"
 echo "  ====================="
-systemctl is-active nginx    >/dev/null && echo "    ✓ Nginx:    activo" || echo "    ✗ Nginx:    inactivo"
-systemctl is-active mysql    >/dev/null && echo "    ✓ MySQL:    activo" || echo "    ✗ MySQL:    inactivo"
+systemctl is-active --quiet nginx 2>/dev/null && echo "    ✓ Nginx:    activo" || echo "    ✗ Nginx:    inactivo"
+systemctl is-active --quiet mysql 2>/dev/null && echo "    ✓ MySQL:    activo" || echo "    ✗ MySQL:    inactivo"
 pm2 list 2>/dev/null | grep -q "$APP_NAME" && echo "    ✓ $APP_NAME: corriendo" || echo "    ✗ $APP_NAME: detenido"
 
 echo ""
 echo "  PRUEBAS HTTP:"
 echo "  =============="
-HTTP_LOCAL=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:3000/ 2>/dev/null)
+HTTP_LOCAL=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 http://127.0.0.1:3000/ 2>/dev/null)
 HTTP_PUBLIC=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 https://$DOMAIN/ 2>/dev/null)
 echo "    Local   (http://127.0.0.1:3000): $HTTP_LOCAL"
 echo "    Publica (https://$DOMAIN):     $HTTP_PUBLIC"
@@ -475,15 +482,15 @@ echo "  RECONSTRUCCIÓN COMPLETADA"
 echo "============================================================"
 echo ""
 echo "  ► PRÓXIMOS PASOS:"
-echo "    1. Edita $APP_DIR/.env.production con tus claves REALES de Supabase"
-echo "       (las 3 lineas marcadas con TU_*)"
-echo "    2. Reinicia la app: pm2 restart $APP_NAME"
+echo "    1. Edita .env.production con tus claves REALES de Supabase:"
+echo "         nano $APP_DIR/.env.production"
+echo "    2. Reinicia: pm2 restart $APP_NAME"
 echo "    3. Verifica:  https://$DOMAIN/"
 echo "    4. Si hay error 500: pm2 logs $APP_NAME --lines 50"
 echo ""
-echo "  ► PARA MIGRACIÓN DE BD (MySQL actual → schema de HR CORE):"
-echo "    Las 14 migraciones SQL que tienes en /sql/ del repo son para PostgreSQL."
-echo "    Para MySQL necesitarás un script de migración equivalente."
+echo "  ► PARA MIGRACIÓN DE BD (MySQL actual → schema HR CORE):"
+echo "    Las 14 migraciones SQL son para PostgreSQL."
+echo "    Para MySQL necesitas un script equivalente."
 echo "    Avísame si quieres que lo genere."
 echo ""
 echo "============================================================"
