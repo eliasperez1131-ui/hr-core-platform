@@ -3,6 +3,8 @@ module.exports = {
   content: [
     './src/app/**/*.{js,jsx,ts,tsx,mdx}',
     './src/components/**/*.{js,jsx,ts,tsx,mdx}',
+    // Asegurarnos de incluir data.js donde se declaran las clases dinámicas
+    './src/lib/**/*.{js,jsx,ts,tsx,mdx}',
   ],
   theme: {
     extend: {
@@ -42,5 +44,17 @@ module.exports = {
       },
     },
   },
+  safelist: [
+    // Colores de gradiente usados dinámicamente desde data.js
+    // (TestCatalog — iconos de las 7 pruebas psicométricas)
+    'bg-gradient-to-br',
+    'from-emerald-400', 'to-emerald-600',
+    'from-blue-400',    'to-blue-600',
+    'from-violet-400',  'to-violet-600',
+    'from-amber-400',   'to-orange-500',
+    'from-rose-400',    'to-pink-600',
+    'from-cyan-400',    'to-cyan-600',
+    'from-indigo-400',  'to-indigo-600',
+  ],
   plugins: [],
 };
