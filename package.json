@@ -18,7 +18,9 @@
     "daemon:stop": "node scripts/pm2-stop.js",
     "daemon:status": "node scripts/pm2-status.js",
     "daemon:logs": "pm2 logs --raw HR CORE",
-    "daemon:install": "node scripts/pm2-install.js"
+    "daemon:install": "node scripts/pm2-install.js",
+    "db:migrate": "node scripts/apply-migrations.js",
+    "db:health": "node scripts/check-supabase.js"
   },
   "dependencies": {
     "@stripe/stripe-js": "^9.12.0",
@@ -27,6 +29,7 @@
     "dotenv": "^16.4.5",
     "kill-port": "^2.0.1",
     "next": "14.2.13",
+    "pg": "^8.22.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-to-print": "^3.3.0",

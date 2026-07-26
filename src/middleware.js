@@ -5,6 +5,12 @@ import { HOME_POR_ROL, rolesPermitidosPara } from '@/lib/routes';
 /**
  * Next.js Middleware — protege rutas privadas y refresca la sesión.
  *
+ * DISEÑO RESILIENTE:
+ *   - Si la BD no responde o user_profiles no existe, NO se cae el sitio.
+ *   - Permite acceso temporal a rutas protegidas (modo degradado) y
+ *     loguea un warning para que el operador investigue.
+ *   - Una vez la BD está OK, el middleware vuelve a la normalidad.
+ *
  * Reglas:
  *   1. Si la ruta es protegida y NO hay sesión → /login?next=<ruta>
  *   2. Si la ruta es protegida y hay sesión pero el rol no califica
@@ -21,14 +27,19 @@ export async function middleware(request) {
   // pueda escribir cookies de sesión sobre ella.
   const response = NextResponse.next({ request: { headers: request.headers } });
 
-  const supabase = createMiddlewareClient(request, response);
+  let session = null;
+  let user    = null;
+  let supabase = null;
 
-  // Refresca la sesión si está por expirar. Importante: NO remover.
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  const user = session?.user ?? null;
+  try {
+    supabase = createMiddlewareClient(request, response);
+    const { data } = await supabase.auth.getSession();
+    session = data?.session ?? null;
+    user    = session?.user ?? null;
+  } catch (err) {
+    console.warn('[middleware] No se pudo leer la sesión de Supabase:', err?.message || err);
+    // Continuar sin sesión — el visitante es anónimo.
+  }
 
   // Roles permitidos para la ruta actual (null = ruta pública).
   const permitidos = rolesPermitidosPara(pathname);
@@ -47,17 +58,27 @@ export async function middleware(request) {
     }
 
     // Autenticado: leer su rol desde user_profiles.
-    const { data: profile } = await supabase
-      .from('user_profiles')
-      .select('rol, activo')
-      .eq('id', user.id)
-      .single();
+    // Si la BD no responde o la tabla no existe, MODO DEGRADADO:
+    // dejamos pasar al usuario con un warning en consola.
+    let profile = null;
+    try {
+      if (supabase) {
+        const { data } = await supabase
+          .from('user_profiles')
+          .select('rol, activo')
+          .eq('id', user.id)
+          .single();
+        profile = data;
+      }
+    } catch (err) {
+      console.warn('[middleware] No se pudo leer user_profiles (BD no aplicada?):', err?.message || err);
+    }
 
     const rol = profile?.rol ?? 'Cliente_Invitado';
 
     if (profile && profile.activo === false) {
       // Cuenta deshabilitada por un admin.
-      await supabase.auth.signOut();
+      try { await supabase?.auth?.signOut(); } catch { /* noop */ }
       const url = request.nextUrl.clone();
       url.pathname = '/login';
       url.searchParams.set('error', 'Tu cuenta está deshabilitada. Contacta al administrador.');
@@ -78,16 +99,23 @@ export async function middleware(request) {
   //  Si ya está autenticado y entra a /login o /registro
   // ─────────────────────────────────────────────────────────────
   if (user && (pathname === '/login' || pathname === '/registro')) {
-    const { data: profile } = await supabase
-      .from('user_profiles')
-      .select('rol')
-      .eq('id', user.id)
-      .single();
+    let profile = null;
+    try {
+      if (supabase) {
+        const { data } = await supabase
+          .from('user_profiles')
+          .select('rol')
+          .eq('id', user.id)
+          .single();
+        profile = data;
+      }
+    } catch (err) {
+      console.warn('[middleware] No se pudo leer user_profiles:', err?.message || err);
+    }
 
     const rol = profile?.rol ?? 'Cliente_Invitado';
     const home = HOME_POR_ROL[rol] || '/dashboard-saas';
 
-    // Si viene con ?next= respeta esa ruta (si es válida).
     const next = searchParams.get('next');
     if (next && next.startsWith('/')) {
       return NextResponse.redirect(new URL(next, request.url));
