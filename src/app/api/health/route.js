@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 /**
- * GET /api/_health
+ * GET /api/health
  *
  * Endpoint de diagnóstico. Devuelve:
  *  - status:      'ok' | 'degraded' | 'down'
@@ -14,7 +14,7 @@ export const runtime = 'nodejs';
  *  - timestamp:   ISO timestamp
  *
  * USO:
- *   curl https://tudominio.com/api/_health
+ *   curl https://tudominio.com/api/health
  *
  * Si Supabase falla, este endpoint lo reporta en `checks.supabase` sin
  * tumbar la respuesta. Sirve para verificar el estado en producción.
