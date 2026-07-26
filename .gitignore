@@ -47,3 +47,5 @@ backups/
 *.tar.gz
 *.sql.gz
 *.pgpass
+*.sql
+!sql/*.sql
