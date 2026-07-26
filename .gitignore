@@ -40,3 +40,10 @@ supabase/.temp
 # Misc
 *.tsbuildinfo
 next-env.d.ts
+
+# Backups locales del VPS (nunca se commitean, ni credenciales)
+backups/
+*.dump
+*.tar.gz
+*.sql.gz
+*.pgpass
