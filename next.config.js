@@ -15,7 +15,7 @@ const nextConfig = {
       ].filter(Boolean),
       bodySizeLimit: '2mb',
     },
-    optimizePackageImports: ['recharts', 'lucide-react', '@supabase/ssr'],
+    optimizePackageImports: ['recharts', '@supabase/ssr'],
   },
   images: {
     remotePatterns: [
