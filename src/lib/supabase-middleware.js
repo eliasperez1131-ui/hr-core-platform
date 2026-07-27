@@ -1,28 +1,29 @@
-import { createServerClient } from '@supabase/ssr';
-
 /**
- * Cliente Supabase para usar dentro de Next.js middleware.js
- * (Edge runtime). Maneja el refresh automático de la sesión
- * leyendo/escribiendo cookies del request/response.
+ * ============================================================
+ *  HR CORE · Cliente "middleware" (equiv a supabase-middleware.js)
+ * ============================================================
+ *  Usado por src/middleware.js para refrescar la sesion JWT.
+ * ============================================================
  */
-export function createMiddlewareClient(request, response) {
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    {
-      cookies: {
-        get(name) {
-          return request.cookies.get(name)?.value;
-        },
-        set(name, value, options) {
-          // Las cookies en middleware se setean sobre el response,
-          // no sobre el request.
-          response.cookies.set({ name, value, ...options });
-        },
-        remove(name, options) {
-          response.cookies.set({ name, value: '', ...options });
-        },
-      },
-    },
-  );
+
+import { NextResponse } from 'next/server';
+import { getSession, setSessionCookie, clearSessionCookie } from '@/lib/session';
+import { SESSION_COOKIE_NAME } from '@/lib/session';
+
+export async function refreshSession(request, response) {
+  const token = request.cookies.get(SESSION_COOKIE_NAME)?.value;
+  if (!token) return { user: null };
+
+  const session = await getSession();
+  if (!session) {
+    // Token expirado: limpiamos la cookie
+    response.cookies.delete(SESSION_COOKIE_NAME);
+    return { user: null };
+  }
+
+  return { user: session };
+}
+
+export function buildResponse(request) {
+  return NextResponse.next({ request: { headers: request.headers } });
 }

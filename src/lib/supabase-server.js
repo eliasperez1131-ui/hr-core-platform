@@ -1,32 +1,34 @@
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+/**
+ * ============================================================
+ *  HR CORE · Cliente "server" (equiv a supabase-server.js)
+ * ============================================================
+ *  Wrapper que reemplaza al cliente Supabase en server components
+ *  y route handlers. Internamente usa db-mysql + session.
+ * ============================================================
+ */
 
-export function createClient() {
-  const cookieStore = cookies();
+import { query, queryOne, insert, update, getPool } from '@/lib/db-mysql';
+import { getSession } from '@/lib/session';
 
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    {
-      cookies: {
-        get(name) {
-          return cookieStore.get(name)?.value;
-        },
-        set(name, value, options) {
-          try {
-            cookieStore.set({ name, value, ...options });
-          } catch {
-            // Server Components no pueden setear cookies; ignorar en ese contexto.
-          }
-        },
-        remove(name, options) {
-          try {
-            cookieStore.set({ name, value: '', ...options });
-          } catch {
-            // Idem arriba.
-          }
-        },
-      },
-    },
+export { query, queryOne, insert, update, getPool };
+
+/**
+ * Devuelve el usuario actual desde la sesion.
+ * Equivalente a `supabase.auth.getUser()`.
+ */
+export async function getCurrentUser() {
+  const session = await getSession();
+  if (!session || !session.sub) return { data: { user: null }, error: null };
+
+  const user = await queryOne(
+    'SELECT id, email, nombre_completo, rol, workspace_id, activo FROM user_profiles WHERE id = ? AND activo = 1',
+    [session.sub],
   );
+  if (!user) return { data: { user: null }, error: { message: 'User not found' } };
+  return { data: { user }, error: null };
 }
+
+/**
+ * Helper para obtener el admin pool de mysql2.
+ */
+export { getPool };

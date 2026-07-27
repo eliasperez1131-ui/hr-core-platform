@@ -17,7 +17,7 @@ import Link from 'next/link';
  * que es un correo válido).
  */
 
-const ADMIN_EMAIL_BACKEND = 'admin@hrcore.com';
+const ADMIN_EMAIL_BACKEND = 'admin@hrcore.com.mx';
 const ADMIN_ALIAS = 'ADMIN';
 
 function resolverEmail(usuario) {

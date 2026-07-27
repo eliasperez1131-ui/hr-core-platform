@@ -1,48 +1,36 @@
 import { NextResponse } from 'next/server';
-import { createMiddlewareClient } from '@/lib/supabase-middleware';
-import { HOME_POR_ROL, rolesPermitidosPara } from '@/lib/routes';
+import { refreshSession, buildResponse } from '@/lib/supabase-middleware';
+import { rolesPermitidosPara } from '@/lib/routes';
 
 /**
- * Next.js Middleware — protege rutas privadas y refresca la sesión.
+ * Next.js Middleware — protege rutas privadas usando sesion JWT propia.
  *
  * DISEÑO RESILIENTE:
- *   - Si la BD no responde o user_profiles no existe, NO se cae el sitio.
- *   - Permite acceso temporal a rutas protegidas (modo degradado) y
- *     loguea un warning para que el operador investigue.
- *   - Una vez la BD está OK, el middleware vuelve a la normalidad.
+ *  - Si la BD no responde, NO se cae el sitio (modo degradado).
+ *  - Si la sesion es invalida, redirige a /login.
+ *  - Si el rol no califica, redirige al home del rol.
  *
  * Reglas:
- *   1. Si la ruta es protegida y NO hay sesión → /login?next=<ruta>
- *   2. Si la ruta es protegida y hay sesión pero el rol no califica
- *      → redirige al dashboard correspondiente al rol del usuario.
- *   3. Si ya hay sesión y entra a /login o /registro → redirige al home.
- *
- * Adicionalmente refresca los tokens de Supabase Auth automáticamente
- * (set/remove de cookies en la respuesta).
+ *  1. Ruta protegida + sin sesion  -> /login?next=<ruta>
+ *  2. Ruta protegida + sesion pero rol no califica -> home del rol
+ *  3. Si ya hay sesion y entra a /login o /register -> redirige al home
+ *  4. Cualquier error de BD -> permite paso (warning en consola)
  */
 export async function middleware(request) {
   const { pathname, searchParams } = request.nextUrl;
+  const response = buildResponse(request);
 
-  // Construimos una respuesta mutable para que el cliente de Supabase
-  // pueda escribir cookies de sesión sobre ella.
-  const response = NextResponse.next({ request: { headers: request.headers } });
-
-  let session = null;
-  let user    = null;
-  let supabase = null;
-
+  // Refrescar/verificar sesion (de forma resiliente)
+  let user = null;
   try {
-    supabase = createMiddlewareClient(request, response);
-    const { data } = await supabase.auth.getSession();
-    session = data?.session ?? null;
-    user    = session?.user ?? null;
+    const session = await refreshSession(request, response);
+    user = session.user;
   } catch (err) {
-    console.warn('[middleware] No se pudo leer la sesión de Supabase:', err?.message || err);
-    // Continuar sin sesión — el visitante es anónimo.
+    console.warn('[middleware] Error verificando sesion (BD no disponible?):', err?.message);
+    // Continuar sin usuario (modo degradado)
   }
 
-  // Roles permitidos para la ruta actual (null = ruta pública).
-  const permitidos = rolesPermitidosPara(pathname);
+  const permitidos    = rolesPermitidosPara(pathname);
   const rutaProtegida = permitidos !== null;
 
   // ─────────────────────────────────────────────────────────────
@@ -50,35 +38,15 @@ export async function middleware(request) {
   // ─────────────────────────────────────────────────────────────
   if (rutaProtegida) {
     if (!user) {
-      // No autenticado → redirige a /login conservando el destino.
       const url = request.nextUrl.clone();
       url.pathname = '/login';
       url.searchParams.set('next', pathname + (request.nextUrl.search || ''));
       return NextResponse.redirect(url);
     }
 
-    // Autenticado: leer su rol desde user_profiles.
-    // Si la BD no responde o la tabla no existe, MODO DEGRADADO:
-    // dejamos pasar al usuario con un warning en consola.
-    let profile = null;
-    try {
-      if (supabase) {
-        const { data } = await supabase
-          .from('user_profiles')
-          .select('rol, activo')
-          .eq('id', user.id)
-          .single();
-        profile = data;
-      }
-    } catch (err) {
-      console.warn('[middleware] No se pudo leer user_profiles (BD no aplicada?):', err?.message || err);
-    }
+    const rol = user.rol || 'Cliente_Invitado';
 
-    const rol = profile?.rol ?? 'Cliente_Invitado';
-
-    if (profile && profile.activo === false) {
-      // Cuenta deshabilitada por un admin.
-      try { await supabase?.auth?.signOut(); } catch { /* noop */ }
+    if (rol === 'Cliente_Invitado' && !user.activo) {
       const url = request.nextUrl.clone();
       url.pathname = '/login';
       url.searchParams.set('error', 'Tu cuenta está deshabilitada. Contacta al administrador.');
@@ -86,8 +54,7 @@ export async function middleware(request) {
     }
 
     if (!permitidos.includes(rol)) {
-      // El rol no califica para esta ruta → redirige a su home.
-      const home = HOME_POR_ROL[rol] || '/dashboard-saas';
+      const home = '/dashboard-saas';
       const url = request.nextUrl.clone();
       url.pathname = home;
       url.search = '';
@@ -96,26 +63,10 @@ export async function middleware(request) {
   }
 
   // ─────────────────────────────────────────────────────────────
-  //  Si ya está autenticado y entra a /login o /registro
+  //  Si ya está autenticado y entra a /login o /register
   // ─────────────────────────────────────────────────────────────
   if (user && (pathname === '/login' || pathname === '/registro')) {
-    let profile = null;
-    try {
-      if (supabase) {
-        const { data } = await supabase
-          .from('user_profiles')
-          .select('rol')
-          .eq('id', user.id)
-          .single();
-        profile = data;
-      }
-    } catch (err) {
-      console.warn('[middleware] No se pudo leer user_profiles:', err?.message || err);
-    }
-
-    const rol = profile?.rol ?? 'Cliente_Invitado';
-    const home = HOME_POR_ROL[rol] || '/dashboard-saas';
-
+    const home = '/dashboard-saas';
     const next = searchParams.get('next');
     if (next && next.startsWith('/')) {
       return NextResponse.redirect(new URL(next, request.url));
@@ -126,11 +77,6 @@ export async function middleware(request) {
   return response;
 }
 
-/**
- * Aplicar el middleware a todas las rutas excepto:
- *   - Archivos estáticos (_next/static, _next/image, favicon, images)
- *   - API routes (cada route.js maneja su propia autorización)
- */
 export const config = {
   matcher: [
     '/((?!_next/static|_next/image|favicon.ico|images/|api/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',

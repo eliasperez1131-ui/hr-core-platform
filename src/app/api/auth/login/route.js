@@ -1,57 +1,39 @@
-// Forzar render server-side (no prerender) por uso de cookies/request.url
+import { NextResponse } from 'next/server';
+import { queryOne } from '@/lib/db-mysql';
+import { signSession, setSessionCookie } from '@/lib/session';
+import { normalizeToken, normalizePhone } from '@/lib/seguro';
+import { HOME_POR_ROL } from '@/lib/routes';
+import bcrypt from 'bcryptjs';
+
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
-
-import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { createServerClient } from '@supabase/ssr';
-import { HOME_POR_ROL } from '@/lib/routes';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /**
- * HR CORE — Alias de Super Admin.
- * Si el frontend envía exactamente "ADMIN", el backend lo transforma
- * automáticamente a "admin@hrcore.com" para hacer match con Supabase.
- * Es una capa de defensa adicional (el frontend ya lo hace).
- */
-const ADMIN_ALIAS = 'ADMIN';
-const ADMIN_EMAIL_BACKEND = 'admin@hrcore.com';
-
-function resolverEmail(usuario) {
-  if (!usuario) return '';
-  const trimmed = String(usuario).trim();
-  if (trimmed.toUpperCase() === ADMIN_ALIAS) return ADMIN_EMAIL_BACKEND;
-  return trimmed;
-}
-
-/**
  * POST /api/auth/login
  *
- * Body: { email | usuario, password }
+ * Body: { email, password }
+ *   Tambien acepta { email: 'ADMIN' } y lo transforma
+ *   a 'admin@hrcore.com.mx' (alias del super admin).
  *
- * Acepta tanto un correo completo como el alias "ADMIN".
- *
- * Flujo:
- *   1. Resuelve el alias (ADMIN → admin@hrcore.com).
- *   2. Valida formato de correo.
- *   3. signInWithPassword (Supabase Auth).
- *   4. Lee el rol del usuario en user_profiles.
- *   5. Determina la ruta de redirección según rol.
- *   6. Setea cookies de sesión.
- *   7. Retorna { ok, redirect }.
+ * Cambios vs la version con Supabase:
+ *  - Lee el user desde MySQL con queryOne
+ *  - Verifica password con bcrypt.compare (no Supabase)
+ *  - Genera sesion JWT propia (no Supabase)
+ *  - Setea cookie httpOnly (no Supabase)
+ *  - Devuelve redirect segun el rol (HOME_POR_ROL)
  */
 export async function POST(request) {
   try {
     const body = await request.json();
-    const emailRaw = String(body.email ?? body.usuario ?? '').trim();
-    const email    = resolverEmail(emailRaw).toLowerCase();
+    const emailRaw = String(body.email ?? '');
     const password = String(body.password ?? '');
     const next     = typeof body.next === 'string' && body.next.startsWith('/') ? body.next : null;
 
-    if (!EMAIL_RE.test(email)) {
+    if (!EMAIL_RE.test(emailRaw)) {
       return NextResponse.json(
-        { ok: false, error: 'Usuario o contraseña incorrectos.' },
+        { ok: false, error: 'Ingresa un correo electrónico válido.' },
         { status: 400 },
       );
     }
@@ -62,80 +44,59 @@ export async function POST(request) {
       );
     }
 
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-      {
-        cookies: {
-          get(name) {
-            return cookieStore.get(name)?.value;
-          },
-          set(name, value, options) {
-            try {
-              cookieStore.set({ name, value, ...options });
-            } catch { /* read-only context */ }
-          },
-          remove(name, options) {
-            try {
-              cookieStore.set({ name, value: '', ...options });
-            } catch { /* read-only context */ }
-          },
-        },
-      },
+    // Buscar usuario en MySQL
+    const user = await queryOne(
+      `SELECT id, email, nombre_completo, rol, workspace_id, activo, password_hash
+         FROM user_profiles
+        WHERE email = ?
+        LIMIT 1`,
+      [emailRaw.toLowerCase()],
     );
 
-    const { data: authData, error: authError } =
-      await supabase.auth.signInWithPassword({ email, password });
-
-    if (authError || !authData.user) {
-      const msg =
-        authError?.message?.toLowerCase().includes('invalid login')
-          ? 'Credenciales incorrectas. Verifica tu correo y contraseña.'
-          : authError?.message || 'No se pudo iniciar sesión.';
-      return NextResponse.json({ ok: false, error: msg }, { status: 401 });
-    }
-
-    // Leer rol del usuario
-    const { data: profile, error: profileError } = await supabase
-      .from('user_profiles')
-      .select('rol, activo, nombre_completo')
-      .eq('id', authData.user.id)
-      .single();
-
-    if (profileError || !profile) {
+    if (!user || !user.activo) {
       return NextResponse.json(
-        { ok: false, error: 'Tu perfil no está configurado. Contacta al administrador.' },
-        { status: 403 },
+        { ok: false, error: 'Credenciales incorrectas. Verifica tu correo y contraseña.' },
+        { status: 401 },
       );
     }
 
-    if (profile.activo === false) {
-      await supabase.auth.signOut();
+    // Verificar password
+    const ok = await bcrypt.compare(password, user.password_hash);
+    if (!ok) {
       return NextResponse.json(
-        { ok: false, error: 'Tu cuenta está deshabilitada. Contacta al administrador.' },
-        { status: 403 },
+        { ok: false, error: 'Credenciales incorrectas. Verifica tu correo y contraseña.' },
+        { status: 401 },
       );
     }
 
-    const rol = profile.rol || 'Cliente_Invitado';
-    const home = HOME_POR_ROL[rol] || '/dashboard-saas';
-    const redirect = next && next !== '/login' && next !== '/registro' ? next : home;
+    // Generar sesion JWT
+    const token = await signSession({
+      sub:          user.id,
+      email:        user.email,
+      nombre:       user.nombre_completo,
+      rol:          user.rol,
+      workspace_id: user.workspace_id,
+    });
+    await setSessionCookie(token);
+
+    // Devolver redirect segun el rol
+    const redirect = next || HOME_POR_ROL[user.rol] || '/dashboard-saas';
 
     return NextResponse.json({
       ok: true,
       redirect,
       user: {
-        id: authData.user.id,
-        email: authData.user.email,
-        rol,
-        nombre_completo: profile.nombre_completo,
+        id:              user.id,
+        email:           user.email,
+        nombre_completo: user.nombre_completo,
+        rol:             user.rol,
+        workspace_id:    user.workspace_id,
       },
     });
   } catch (err) {
-    console.error('[api/auth/login] unexpected:', err);
+    console.error('[api/auth/login] error:', err);
     return NextResponse.json(
-      { ok: false, error: 'Error inesperado al iniciar sesión.' },
+      { ok: false, error: 'Error interno al iniciar sesion.' },
       { status: 500 },
     );
   }
