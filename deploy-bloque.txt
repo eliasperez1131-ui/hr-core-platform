@@ -1,0 +1,18 @@
+==== INICIO - PEGA EN SSH ====
+
+cd /var/www/html
+
+# 1. Reinstalar bcryptjs
+npm install bcryptjs --no-audit --no-fund 2>&1 | tail -3
+
+# 2. Generar hash
+HASH=$(node -e 'const b=require("bcryptjs"); b.hash("318088330",12).then(h=>process.stdout.write(h))')
+echo "Hash generado: ${HASH:0:30}..."
+
+# 3. Crear el Super Admin
+mysql -uroot -p'123456' hrcore_db -e "INSERT INTO user_profiles (id, email, password_hash, nombre_completo, rol, workspace_id, activo, created_at, updated_at) VALUES ('00000000-0000-0000-0000-000000000001', 'admin@hrcore.com.mx', '\$HASH', 'Super Administrador HR CORE', 'Super_Admin', NULL, 1, NOW(), NOW())"
+
+# 4. Verificar
+mysql -uroot -p'123456' hrcore_db -e "SELECT id, email, rol, nombre_completo, activo FROM user_profiles WHERE rol='Super_Admin'"
+
+==== FIN ====
