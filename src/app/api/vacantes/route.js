@@ -1,109 +1,88 @@
-// Forzar render server-side (no prerender) por uso de cookies/request.url
+import { NextResponse } from 'next/server';
+import { query, queryOne } from '@/lib/db-mysql';
+import { getCurrentUser } from '@/lib/supabase-server';
+import { randomUUID } from 'crypto';
+
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-import { NextResponse } from 'next/server';
-import { createAdminClient } from '@/lib/supabase-admin';
-
-const TURNOS_VALIDOS = ['Fijo', 'Rolado', 'Ciclico'];
-const MODALIDADES_VALIDAS = ['Presencial', 'Remoto', 'Híbrido'];
-const ESTATUS_VALIDOS = ['Abierta', 'Cerrada', 'Pausada'];
-
 /**
- * POST /api/vacantes
- *
- * Crea una vacante en el workspace del usuario autenticado.
- *
- * NOTA DE SEGURIDAD: este endpoint debe ejecutarse SIEMPRE en
- * el servidor. La verificación de rol (Admin/Coordinador) se
- * hace vía RLS al hacer el INSERT — si el usuario no tiene
- * permisos, Supabase rechaza la operación.
- *
- * En producción: leer `auth.uid()` desde la sesión y comparar
- * con user_profiles.rol antes de permitir el INSERT.
+ * GET  /api/vacantes   - Lista las vacantes del workspace del usuario
+ * POST /api/vacantes   - Crea una nueva vacante
  */
-export async function POST(request) {
+export async function GET(request) {
   try {
-    const body = await request.json();
-
-    const titulo_puesto = String(body.titulo_puesto ?? '').trim();
-    if (!titulo_puesto || titulo_puesto.length < 3) {
-      return NextResponse.json(
-        { ok: false, error: 'El título del puesto es obligatorio (mín. 3 caracteres).' },
-        { status: 400 },
-      );
+    const { user } = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ ok: false, error: 'No autenticado.' }, { status: 401 });
     }
 
-    if (!TURNOS_VALIDOS.includes(body.tipo_jornada)) {
-      return NextResponse.json({ ok: false, error: 'tipo_jornada inválido.' }, { status: 400 });
-    }
-    if (body.modalidad && !MODALIDADES_VALIDAS.includes(body.modalidad)) {
-      return NextResponse.json({ ok: false, error: 'modalidad inválida.' }, { status: 400 });
-    }
-    if (body.estatus && !ESTATUS_VALIDOS.includes(body.estatus)) {
-      return NextResponse.json({ ok: false, error: 'estatus inválido.' }, { status: 400 });
-    }
-
-    const payload = {
-      workspace_id: body.workspace_id,
-      titulo_puesto,
-      descripcion: body.descripcion?.slice(0, 2000) || null,
-      requisitos:  body.requisitos?.slice(0, 2000)  || null,
-      beneficios:  body.beneficios?.slice(0, 1000)  || null,
-      tipo_jornada: body.tipo_jornada,
-      detalle_turno: String(body.detalle_turno ?? '').slice(0, 150) || null,
-      modalidad:   body.modalidad || 'Presencial',
-      ubicacion:   body.ubicacion?.slice(0, 200) || null,
-      sueldo_candidato: numOrNull(body.sueldo_candidato),
-
-      // Los financieros van al servidor SOLO si el rol lo permite.
-      // La verificación fina la hace la política RLS en Supabase.
-      cobro_cliente:      numOrNull(body.cobro_cliente),
-      comision_freelance: numOrNull(body.comision_freelance),
-
-      asignado_a_coordinador_id: body.asignado_a_coordinador_id || null,
-      vacantes_disponibles:      Math.max(parseInt(body.vacantes_disponibles || 1, 10), 1),
-      estatus:                  body.estatus || 'Abierta',
-      es_delicada:              Boolean(body.es_delicada),
-    };
-
-    if (!payload.workspace_id) {
-      return NextResponse.json(
-        { ok: false, error: 'Falta workspace_id.' },
-        { status: 400 },
-      );
-    }
-
-    const supabase = createAdminClient();
-    const { data, error } = await supabase
-      .from('vacantes')
-      .insert(payload)
-      .select('id, titulo_puesto')
-      .single();
-
-    if (error) {
-      console.error('[api/vacantes] insert error:', error);
-      return NextResponse.json(
-        { ok: false, error: 'No se pudo crear la vacante. Verifica permisos.' },
-        { status: 500 },
-      );
-    }
-
-    return NextResponse.json(
-      { ok: true, id: data.id, titulo: data.titulo_puesto },
-      { status: 201 },
+    const rows = await query(
+      `SELECT v.*, we.nombre_empresa, COUNT(vc.id) AS candidatos_count
+         FROM vacantes v
+         LEFT JOIN workspaces_empresas we ON we.id = v.workspace_id
+         LEFT JOIN vacante_candidatos vc ON vc.vacante_id = v.id
+        WHERE v.workspace_id = ? OR v.wacante_id = ?
+        GROUP BY v.id
+        ORDER BY v.created_at DESC`,
+      [user.workspace_id, user.id],
     );
+
+    return NextResponse.json({ ok: true, vacantes: rows });
   } catch (err) {
-    console.error('[api/vacantes] unexpected:', err);
-    return NextResponse.json(
-      { ok: false, error: 'Error inesperado.' },
-      { status: 500 },
-    );
+    console.error('[api/vacantes] GET error:', err);
+    return NextResponse.json({ ok: true, vacantes: [] });
   }
 }
 
-function numOrNull(v) {
-  if (v === null || v === undefined || v === '') return null;
-  const n = Number(v);
-  return Number.isFinite(n) && n >= 0 ? n : null;
+export async function POST(request) {
+  try {
+    const { user } = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ ok: false, error: 'No autenticado.' }, { status: 401 });
+    }
+    if (!['Super_Admin', 'Administrador_Agencia', 'Coordinador'].includes(user.rol)) {
+      return NextResponse.json({ ok: false, error: 'Sin permisos.' }, { status: 403 });
+    }
+
+    const body = await request.json();
+    const id = randomUUID();
+    const titulo = String(body.titulo_puesto || '').trim();
+    if (!titulo) {
+      return NextResponse.json({ ok: false, error: 'El título es requerido.' }, { status: 400 });
+    }
+
+    await query(
+      `INSERT INTO vacantes
+         (id, titulo_puesto, descripcion, requisitos, beneficios, tipo_jornada, detalle_turno,
+          modalidad, ubicacion, sueldo_candidato, cobro_cliente, comision_freelance,
+          es_delicada, estatus, vacantes_disponibles, workspace_id, creado_por, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+      [
+        id,
+        titulo,
+        body.descripcion || null,
+        body.requisitos  || null,
+        body.beneficios  || null,
+        body.tipo_jornada || 'Fijo',
+        body.detalle_turno || null,
+        body.modalidad  || 'Presencial',
+        body.ubicacion  || null,
+        body.sueldo_candidato ? Number(body.sueldo_candidato) : null,
+        body.cobro_cliente    ? Number(body.cobro_cliente)    : null,
+        body.comision_freelance ? Number(body.comision_freelance) : null,
+        body.es_delicada ? 1 : 0,
+        body.estatus || 'Abierta',
+        body.vacantes_disponibles || 1,
+        user.workspace_id,
+        user.id,
+      ],
+    );
+
+    const nueva = await queryOne('SELECT * FROM vacantes WHERE id = ?', [id]);
+    return NextResponse.json({ ok: true, vacante: nueva }, { status: 201 });
+  } catch (err) {
+    console.error('[api/vacantes] POST error:', err);
+    return NextResponse.json({ ok: false, error: 'Error al crear la vacante.' }, { status: 500 });
+  }
 }
